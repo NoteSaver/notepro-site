@@ -198,13 +198,13 @@ elif RAZORPAY_AVAILABLE:
     logger.warning("Razorpay keys missing in .env — payment features disabled")
 
 # ===== SERVER SIDE SESSION (FIX) =====
-app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "sqlalchemy"
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_FILE_DIR"] = "./flask_session"
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_KEY_PREFIX"] = "notesaver:"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+# SESSION_SQLALCHEMY set hoga db.init_app ke baad
 
 Session(app)
 
@@ -221,11 +221,13 @@ db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Create all database tables on startup (required on Render where SQLite is ephemeral)
+# SESSION_SQLALCHEMY — SQLAlchemy session backend (deploy ke baad bhi sessions valid rahenge)
+app.config["SESSION_SQLALCHEMY"] = db
+
+# Create all database tables on startup (Render pe SQLite ephemeral hai — har deploy pe chahiye)
 with app.app_context():
     db.create_all()
     logger.info("Database tables created/verified successfully")
-
 
 
 @login_manager.unauthorized_handler
@@ -5897,15 +5899,7 @@ def forbidden(e):
 def internal_error(e):
     db.session.rollback()
     logger.error(f"500 error: {str(e)} at {request.url}")
-    try:
-        return render_template('500.html'), 500
-    except Exception:
-        return """<!DOCTYPE html><html><head><title>Server Error</title>
-<style>body{font-family:sans-serif;text-align:center;padding:60px;background:#f8f8f8;}
-h1{color:#e74c3c;}a{color:#3498db;}</style></head>
-<body><h1>500 - Internal Server Error</h1>
-<p>Something went wrong. Please try again later.</p>
-<a href="/">Go Home</a></body></html>""", 500
+    return render_template('500.html'), 500
 
 @app.errorhandler(413)
 def request_entity_too_large(e):
