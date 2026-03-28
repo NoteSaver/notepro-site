@@ -24,6 +24,7 @@ def _require_env(key: str) -> str:
     return val
 
 
+
 class Config:
     # ──────────────────────────────────────────────────────────
     # 🔐 SECRET KEY
@@ -34,8 +35,7 @@ class Config:
     # ──────────────────────────────────────────────────────────
     # 🗄️  DATABASE
     # ──────────────────────────────────────────────────────────
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'instance', 'notes.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/notes.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # ──────────────────────────────────────────────────────────
