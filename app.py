@@ -197,8 +197,8 @@ if RAZORPAY_AVAILABLE and RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
 elif RAZORPAY_AVAILABLE:
     logger.warning("Razorpay keys missing in .env — payment features disabled")
 
-# ===== SERVER SIDE SESSION (FIX) =====
-app.config["SESSION_TYPE"] = "sqlalchemy"
+# ===== SERVER SIDE SESSION =====
+# /tmp use karo — Render pe available, restart ke beech bhi rehta hai
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_KEY_PREFIX"] = "notesaver:"
@@ -217,9 +217,10 @@ db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# SESSION_SQLALCHEMY — db.init_app ke BAAD set karo (Flask-Session requirement)
-app.config["SESSION_SQLALCHEMY"] = db
-Session(app)  # Ab sahi jagah — db already init ho chuka hai
+# Flask-Session: /tmp use karo — Render pe available hai aur cross-deploy CSRF issue nahi
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = "/tmp/flask_sessions"
+Session(app)
 
 # Create all database tables on startup (Render pe SQLite ephemeral hai — har deploy pe chahiye)
 with app.app_context():
