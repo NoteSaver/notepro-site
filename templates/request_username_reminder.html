@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block title %}Forgot Username - NoteSaver Pro{% endblock %}
+
+{% block content %}
+<div class="forgot-username-container">
+    <div class="forgot-username-card">
+        <!-- Forgot Username Icon -->
+        <div class="forgot-username-icon">
+            <i class="fas fa-user-question"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="forgot-username-title">Forgot Username?</h1>
+        <p class="forgot-username-subtitle">Enter your registered email address and we'll send you your username</p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'danger' else 'info-circle' }}"></i>
+                    {{ message | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Forgot Username Form -->
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Email Field -->
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    {{ form.email(class="form-control", placeholder="your@email.com") }}
+                </div>
+                {% for error in form.email.errors %}
+                    <div class="form-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-forgot-username">
+                <i class="fas fa-paper-plane"></i>
+                {{ form.submit.label.text or "Send Username" }}
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="forgot-username-footer">
+            <a href="{{ url_for('login') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Login
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== FORGOT USERNAME PAGE STYLES ==================== */
+.forgot-username-container {
+    min-height: calc(100vh - var(--navbar-height) - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.forgot-username-card {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    animation: fadeInUp 0.6s ease;
+}
+
+body.dark-theme .forgot-username-card {
+    background: #1e293b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.forgot-username-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+}
+
+.forgot-username-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.forgot-username-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-theme .forgot-username-title {
+    color: #e2e8f0;
+}
+
+.forgot-username-subtitle {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+body.dark-theme .forgot-username-subtitle {
+    color: #94a3b8;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: block;
+}
+
+body.dark-theme .form-label {
+    color: #e2e8f0;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+body.dark-theme .input-icon {
+    color: #94a3b8;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--gray-50);
+}
+
+.form-control:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    background: white;
+    outline: none;
+}
+
+body.dark-theme .form-control {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-control:focus {
+    background: #1e293b;
+    border-color: #f59e0b;
+}
+
+.form-error {
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-forgot-username {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-forgot-username:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+}
+
+.btn-forgot-username:active {
+    transform: translateY(0);
+}
+
+.forgot-username-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+body.dark-theme .forgot-username-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-link {
+    color: var(--gray-600);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+body.dark-theme .back-link {
+    color: #94a3b8;
+}
+
+.back-link:hover {
+    color: #f59e0b;
+    text-decoration: none;
+}
+
+.back-link i {
+    font-size: 0.85rem;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0.75rem;
+    border: none;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert i {
+    font-size: 1.1rem;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+body.dark-theme .alert-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+}
+
+body.dark-theme .alert-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+body.dark-theme .alert-info {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .forgot-username-card {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+    }
+
+    .forgot-username-icon {
+        width: 70px;
+        height: 70px;
+    }
+
+    .forgot-username-icon i {
+        font-size: 2rem;
+    }
+
+    .forgot-username-title {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,688 @@
+<!-- templates/choose_notes_to_reset.html -->
+{% extends "base.html" %}
+
+{% block title %}Choose Notes to Reset - NoteSaver Pro{% endblock %}
+
+{% block head %}
+<style>
+/* ── Tokens ──────────────────────────────────────────────────── */
+:root {
+    --cn-bg:       #0b0f1a;
+    --cn-surface:  #111827;
+    --cn-surface2: #1a2236;
+    --cn-border:   rgba(255,255,255,.07);
+    --cn-primary:  #6366f1;
+    --cn-secondary:#8b5cf6;
+    --cn-accent:   #22d3ee;
+    --cn-danger:   #f87171;
+    --cn-success:  #34d399;
+    --cn-warning:  #fbbf24;
+    --cn-text:     #f1f5f9;
+    --cn-muted:    #64748b;
+    --cn-radius:   1rem;
+    --cn-trans:    .25s cubic-bezier(.4,0,.2,1);
+}
+body.light-theme, @media (prefers-color-scheme: light) {
+    :root {
+        --cn-bg: #f0f4ff; --cn-surface: #fff; --cn-surface2: #f8faff;
+        --cn-border: rgba(0,0,0,.06); --cn-text: #1e293b; --cn-muted: #94a3b8;
+    }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Page shell ──────────────────────────────────────────────── */
+.cn-root {
+    min-height: calc(100vh - var(--navbar-height,64px));
+    background: var(--cn-bg);
+    padding: 2.5rem 1rem 4rem;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    position: relative;
+    overflow-x: hidden;
+}
+.cn-root::before {
+    content:'';
+    position:fixed; inset:0; pointer-events:none;
+    background:
+        radial-gradient(ellipse 60% 40% at 15% 10%, rgba(99,102,241,.18), transparent),
+        radial-gradient(ellipse 50% 60% at 85% 90%, rgba(139,92,246,.14), transparent);
+}
+
+/* ── Card wrapper ────────────────────────────────────────────── */
+.cn-card {
+    position: relative; z-index:1;
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--cn-surface);
+    border: 1px solid var(--cn-border);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 32px 64px rgba(0,0,0,.45), 0 0 0 1px var(--cn-border);
+    animation: cnUp .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes cnUp {
+    from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none}
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.cn-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.cn-header::after {
+    content:'';
+    position:absolute; inset:0;
+    background: repeating-linear-gradient(
+        45deg, transparent, transparent 20px,
+        rgba(255,255,255,.025) 20px, rgba(255,255,255,.025) 40px
+    );
+}
+.cn-header-icon {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    border: 2px solid rgba(255,255,255,.3);
+    position: relative; z-index:1;
+    animation: cnIconPulse 3s ease-in-out infinite;
+}
+@keyframes cnIconPulse {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(255,255,255,.3); }
+    50%    { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+}
+.cn-header-icon i { font-size: 1.9rem; color:#fff; }
+.cn-header h2 { font-size:1.65rem; font-weight:800; color:#fff; margin:0 0 .35rem; position:relative; z-index:1; }
+.cn-header p  { color:rgba(255,255,255,.8); margin:0; font-size:.93rem; position:relative; z-index:1; }
+
+/* ── Body ────────────────────────────────────────────────────── */
+.cn-body { padding: 2rem; }
+
+/* ── User info strip ─────────────────────────────────────────── */
+.cn-user-strip {
+    display: flex; align-items: center; gap: .75rem;
+    background: rgba(99,102,241,.08);
+    border: 1px solid rgba(99,102,241,.2);
+    border-radius: .75rem;
+    padding: .85rem 1.1rem;
+    margin-bottom: 1.5rem;
+    font-size: .9rem;
+    color: var(--cn-text);
+}
+.cn-user-strip i { color: var(--cn-primary); font-size: 1.1rem; }
+
+/* ── Alert ───────────────────────────────────────────────────── */
+.cn-alert {
+    display:flex; align-items:flex-start; gap:.65rem;
+    padding:.85rem 1rem; border-radius:.75rem;
+    margin-bottom:1.25rem; font-size:.9rem;
+    animation: cnFadeIn .3s ease;
+}
+@keyframes cnFadeIn {from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cn-alert--warning { background:rgba(251,191,36,.1); color:var(--cn-warning); border:1px solid rgba(251,191,36,.25); }
+.cn-alert--info    { background:rgba(96,165,250,.1);  color:#60a5fa;           border:1px solid rgba(96,165,250,.25); }
+.cn-alert--danger  { background:rgba(248,113,113,.1); color:var(--cn-danger);  border:1px solid rgba(248,113,113,.25); }
+.cn-alert-close { background:none; border:none; cursor:pointer; color:inherit; opacity:.6; padding:0; margin-left:auto; }
+.cn-alert-close:hover { opacity:1; }
+
+/* ── Toolbar (select-all / stats) ────────────────────────────── */
+.cn-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+}
+.cn-toolbar-title {
+    font-size: 1rem; font-weight: 700;
+    color: var(--cn-text);
+    display: flex; align-items: center; gap: .5rem;
+}
+.cn-toolbar-title .cnt-badge {
+    font-size: .78rem;
+    background: var(--cn-primary);
+    color: #fff;
+    padding: .15rem .55rem;
+    border-radius: 2rem;
+    font-weight: 700;
+}
+.cn-btns { display:flex; gap:.5rem; }
+.cn-btn-sm {
+    padding: .45rem .9rem;
+    font-size: .83rem;
+    font-weight: 600;
+    border-radius: .55rem;
+    cursor: pointer;
+    transition: all var(--cn-trans);
+    border: 1.5px solid;
+    display: flex; align-items: center; gap: .35rem;
+}
+.cn-btn-sm--primary {
+    border-color: var(--cn-primary);
+    color: var(--cn-primary);
+    background: rgba(99,102,241,.08);
+}
+.cn-btn-sm--primary:hover { background: var(--cn-primary); color:#fff; }
+.cn-btn-sm--neutral {
+    border-color: var(--cn-border);
+    color: var(--cn-muted);
+    background: transparent;
+}
+.cn-btn-sm--neutral:hover { border-color: var(--cn-muted); color: var(--cn-text); background: rgba(255,255,255,.04); }
+
+/* ── Stats strip ─────────────────────────────────────────────── */
+.cn-stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 1px;
+    background: var(--cn-border);
+    border-radius: .85rem;
+    overflow: hidden;
+    border: 1px solid var(--cn-border);
+    margin-bottom: 1.75rem;
+}
+.cn-stat {
+    background: var(--cn-surface2);
+    padding: 1rem;
+    text-align: center;
+    transition: background var(--cn-trans);
+}
+.cn-stat-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--cn-text);
+    line-height: 1;
+    transition: color var(--cn-trans);
+}
+.cn-stat--selected .cn-stat-num { color: var(--cn-primary); }
+.cn-stat--remaining .cn-stat-num { color: var(--cn-accent); }
+.cn-stat-label { font-size: .75rem; color: var(--cn-muted); margin-top: .3rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+
+/* ── Notes grid ──────────────────────────────────────────────── */
+.cn-notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+/* ── Note card ───────────────────────────────────────────────── */
+.cn-note {
+    background: var(--cn-surface2);
+    border: 1.5px solid var(--cn-border);
+    border-radius: var(--cn-radius);
+    padding: 1.1rem 1.1rem 1rem;
+    cursor: pointer;
+    transition: all var(--cn-trans);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+.cn-note::before {
+    content:'';
+    position:absolute; top:0; left:0;
+    width:3px; height:100%;
+    background: var(--cn-border);
+    transition: background var(--cn-trans), width var(--cn-trans);
+}
+.cn-note:hover { border-color: rgba(99,102,241,.4); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.cn-note:hover::before { background: var(--cn-primary); }
+.cn-note.is-selected {
+    border-color: var(--cn-primary);
+    background: rgba(99,102,241,.08);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+.cn-note.is-selected::before { background: var(--cn-primary); width: 4px; }
+
+/* Checkbox area */
+.cn-note-check {
+    display: flex; align-items: flex-start; gap: .75rem;
+}
+.cn-note-check input[type="checkbox"] {
+    width: 18px; height: 18px; margin-top: .15rem; flex-shrink:0;
+    accent-color: var(--cn-primary);
+    cursor: pointer;
+}
+.cn-note-body { flex: 1; min-width: 0; }
+.cn-note-title {
+    font-size: .95rem; font-weight: 700;
+    color: var(--cn-text);
+    margin: 0 0 .35rem;
+    display: flex; align-items: center; gap: .4rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cn-note-title i { color: var(--cn-danger); font-size: .85rem; flex-shrink:0; }
+.cn-note-excerpt {
+    font-size: .82rem; color: var(--cn-muted);
+    line-height: 1.5;
+    margin: 0 0 .65rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.cn-note-footer {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.cn-note-cat {
+    font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+    padding: .2rem .6rem;
+    background: rgba(99,102,241,.12);
+    color: var(--cn-primary);
+    border-radius: 2rem;
+    text-transform: uppercase;
+}
+.cn-note-date { font-size: .75rem; color: var(--cn-muted); }
+
+/* Selected checkmark overlay */
+.cn-note-tick {
+    position:absolute; top:.7rem; right:.7rem;
+    width:22px; height:22px;
+    background: var(--cn-primary);
+    border-radius: 50%;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; transform: scale(.5);
+    transition: all var(--cn-trans);
+    pointer-events:none;
+}
+.cn-note.is-selected .cn-note-tick { opacity:1; transform: scale(1); }
+.cn-note-tick i { color:#fff; font-size:.65rem; }
+
+/* ── Warning banner ──────────────────────────────────────────── */
+.cn-warning {
+    display:flex; align-items:flex-start; gap:.75rem;
+    background: rgba(251,191,36,.08);
+    border: 1px solid rgba(251,191,36,.25);
+    border-radius: .75rem;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.5rem;
+    font-size: .88rem;
+    color: var(--cn-warning);
+    line-height: 1.55;
+}
+.cn-warning i { flex-shrink:0; margin-top:.1rem; }
+
+/* ── Confirm checkbox ────────────────────────────────────────── */
+.cn-confirm {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding: 1rem 1.1rem;
+    background: rgba(248,113,113,.06);
+    border: 1px solid rgba(248,113,113,.15);
+    border-radius: .75rem;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: background var(--cn-trans);
+}
+.cn-confirm:hover { background: rgba(248,113,113,.1); }
+.cn-confirm input { width:18px; height:18px; margin-top:.1rem; flex-shrink:0; accent-color: var(--cn-danger); cursor:pointer; }
+.cn-confirm label { font-size: .88rem; color: var(--cn-text); font-weight: 600; cursor:pointer; line-height:1.5; }
+
+/* ── Action bar ──────────────────────────────────────────────── */
+.cn-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--cn-border);
+}
+.cn-selection-label {
+    font-size: .88rem;
+    color: var(--cn-muted);
+    font-weight: 600;
+    transition: color var(--cn-trans);
+}
+.cn-selection-label.has-selection { color: var(--cn-primary); }
+.cn-action-btns { display:flex; gap:.75rem; flex-wrap:wrap; }
+
+/* Cancel btn */
+.cn-btn-cancel {
+    padding: .75rem 1.4rem;
+    font-size: .93rem; font-weight: 700;
+    border: 1.5px solid var(--cn-border);
+    background: transparent;
+    color: var(--cn-muted);
+    border-radius: .75rem;
+    cursor: pointer;
+    text-decoration: none;
+    display:inline-flex; align-items:center; gap:.4rem;
+    transition: all var(--cn-trans);
+}
+.cn-btn-cancel:hover { border-color: var(--cn-muted); color: var(--cn-text); background: rgba(255,255,255,.04); }
+
+/* Submit btn */
+.cn-btn-submit {
+    padding: .75rem 1.6rem;
+    font-size: .93rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--cn-danger), #e11d48);
+    color: #fff;
+    border: none;
+    border-radius: .75rem;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: .5rem;
+    box-shadow: 0 4px 16px rgba(248,113,113,.35);
+    transition: all var(--cn-trans);
+    position: relative; overflow: hidden;
+}
+.cn-btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(248,113,113,.5);
+    filter: brightness(1.08);
+}
+.cn-btn-submit:disabled {
+    opacity:.45; cursor:not-allowed; transform:none; filter:none;
+    box-shadow: none;
+}
+.cn-btn-submit .cn-spin { display:none; }
+.cn-btn-submit.is-loading .cn-spin { display:inline-block; }
+.cn-btn-submit.is-loading .cn-btn-icon { display:none; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.cn-card-footer {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: .9rem 2rem;
+    background: rgba(0,0,0,.2);
+    border-top: 1px solid var(--cn-border);
+    font-size:.8rem; color: var(--cn-muted);
+}
+
+/* ── Progress bar ────────────────────────────────────────────── */
+.cn-progress-wrap {
+    height: 3px;
+    background: var(--cn-border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+.cn-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cn-primary), var(--cn-accent));
+    border-radius: 3px;
+    width: 0%;
+    transition: width var(--cn-trans);
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.cn-empty {
+    text-align:center; padding:3rem 1rem; color:var(--cn-muted);
+}
+.cn-empty i { font-size:2.5rem; margin-bottom:1rem; display:block; opacity:.4; }
+.cn-empty p { font-size:.95rem; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media(max-width:640px) {
+    .cn-body { padding: 1.25rem; }
+    .cn-stats { grid-template-columns: repeat(3,1fr); }
+    .cn-notes-grid { grid-template-columns: 1fr; }
+    .cn-action-bar { flex-direction: column; align-items:stretch; }
+    .cn-action-btns { flex-direction: column; }
+    .cn-btn-cancel, .cn-btn-submit { width:100%; justify-content:center; }
+    .cn-card-footer { flex-direction:column; gap:.4rem; text-align:center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cn-root">
+    <div class="cn-card">
+
+        <!-- Header -->
+        <div class="cn-header">
+            <div class="cn-header-icon">
+                <i class="fas fa-list-check"></i>
+            </div>
+            <h2>Choose Notes to Reset</h2>
+            <p>Select which notes you want to remove password protection from</p>
+        </div>
+
+        <div class="cn-body">
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="cn-alert cn-alert--{{ category or 'info' }}">
+                        <i class="fas fa-{{ 'check-circle' if category=='success' else 'exclamation-triangle' if category in ('warning','danger') else 'info-circle' }}"></i>
+                        <span>{{ message }}</span>
+                        <button class="cn-alert-close" onclick="this.closest('.cn-alert').remove()"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- User strip -->
+            <div class="cn-user-strip">
+                <i class="fas fa-user-circle"></i>
+                <span><strong>{{ user.username }}</strong> &nbsp;·&nbsp; {{ user.email }}</span>
+            </div>
+
+            <form method="POST" id="resetForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="action" value="remove_password"/>
+
+                <!-- Toolbar -->
+                <div class="cn-toolbar">
+                    <div class="cn-toolbar-title">
+                        <i class="fas fa-shield-alt" style="color:var(--cn-danger)"></i>
+                        Protected Notes
+                        <span class="cnt-badge">{{ protected_notes|length }}</span>
+                    </div>
+                    <div class="cn-btns">
+                        <button type="button" class="cn-btn-sm cn-btn-sm--primary" id="selectAll">
+                            <i class="fas fa-check-double"></i> Select All
+                        </button>
+                        <button type="button" class="cn-btn-sm cn-btn-sm--neutral" id="selectNone">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="cn-progress-wrap">
+                    <div class="cn-progress-bar" id="progressBar"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="cn-stats">
+                    <div class="cn-stat">
+                        <div class="cn-stat-num">{{ protected_notes|length }}</div>
+                        <div class="cn-stat-label">Total Protected</div>
+                    </div>
+                    <div class="cn-stat cn-stat--selected">
+                        <div class="cn-stat-num" id="selectedCount">0</div>
+                        <div class="cn-stat-label">Selected</div>
+                    </div>
+                    <div class="cn-stat cn-stat--remaining">
+                        <div class="cn-stat-num" id="remainingCount">{{ protected_notes|length }}</div>
+                        <div class="cn-stat-label">Will Remain Protected</div>
+                    </div>
+                </div>
+
+                <!-- Notes grid -->
+                {% if protected_notes %}
+                <div class="cn-notes-grid" id="notesGrid">
+                    {% for note in protected_notes %}
+                    <div class="cn-note" data-note-id="{{ note.id }}">
+                        <div class="cn-note-check">
+                            <input class="note-checkbox"
+                                   type="checkbox"
+                                   name="selected_notes"
+                                   value="{{ note.id }}"
+                                   id="note_{{ note.id }}">
+                            <div class="cn-note-body">
+                                <div class="cn-note-title">
+                                    <i class="fas fa-shield-alt"></i>
+                                    {{ note.title }}
+                                </div>
+                                <p class="cn-note-excerpt">
+                                    {{ note.content[:100] }}{{ '…' if note.content|length > 100 }}
+                                </p>
+                                <div class="cn-note-footer">
+                                    <span class="cn-note-cat">{{ note.category }}</span>
+                                    <span class="cn-note-date">
+                                        <i class="fas fa-clock"></i>
+                                        {{ note.updated_at.strftime('%d %b %Y') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cn-note-tick"><i class="fas fa-check"></i></div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="cn-empty">
+                    <i class="fas fa-shield-alt"></i>
+                    <p>No password-protected notes found.</p>
+                </div>
+                {% endif %}
+
+                <!-- Warning -->
+                <div class="cn-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div><strong>Important:</strong> Password protection will be permanently removed from selected notes. This cannot be undone.</div>
+                </div>
+
+                <!-- Confirm checkbox -->
+                <div class="cn-confirm" onclick="document.getElementById('confirmReset').click()">
+                    <input type="checkbox" id="confirmReset" required onclick="event.stopPropagation()">
+                    <label for="confirmReset" onclick="event.stopPropagation()">
+                        I understand that password protection will be permanently removed and this action cannot be undone.
+                    </label>
+                </div>
+
+                <!-- Action bar -->
+                <div class="cn-action-bar">
+                    <span class="cn-selection-label" id="selectionLabel">No notes selected</span>
+                    <div class="cn-action-btns">
+                        <a href="{{ url_for('login') }}" class="cn-btn-cancel">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="cn-btn-submit" id="resetButton" disabled>
+                            <i class="fas fa-circle-notch fa-spin cn-spin"></i>
+                            <i class="fas fa-unlock cn-btn-icon"></i>
+                            <span id="resetBtnText">Remove Protection</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="cn-card-footer">
+            <span><i class="fas fa-clock"></i> &nbsp;Reset link expires in 1 hour</span>
+            <span><i class="fas fa-shield-alt"></i> &nbsp;Selective note reset · NoteSaver Pro</span>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAllBtn   = document.getElementById('selectAll');
+    const selectNoneBtn  = document.getElementById('selectNone');
+    const confirmCb      = document.getElementById('confirmReset');
+    const resetBtn       = document.getElementById('resetButton');
+    const resetBtnText   = document.getElementById('resetBtnText');
+    const resetForm      = document.getElementById('resetForm');
+    const checkboxes     = document.querySelectorAll('.note-checkbox');
+    const selLabel       = document.getElementById('selectionLabel');
+    const selectedNum    = document.getElementById('selectedCount');
+    const remainingNum   = document.getElementById('remainingCount');
+    const progressBar    = document.getElementById('progressBar');
+    const total          = {{ protected_notes|length }};
+
+    function updateState() {
+        const checked = document.querySelectorAll('.note-checkbox:checked');
+        const count   = checked.length;
+
+        // Stats
+        selectedNum.textContent  = count;
+        remainingNum.textContent = total - count;
+
+        // Progress bar
+        progressBar.style.width = total > 0 ? (count/total*100)+'%' : '0%';
+
+        // Label
+        if (count === 0) {
+            selLabel.textContent = 'No notes selected';
+            selLabel.classList.remove('has-selection');
+        } else {
+            selLabel.textContent = count === 1 ? '1 note selected' : `${count} notes selected`;
+            selLabel.classList.add('has-selection');
+        }
+
+        // Button text
+        resetBtnText.textContent = count > 0
+            ? `Remove Protection (${count})`
+            : 'Remove Protection';
+
+        // Button enabled
+        resetBtn.disabled = !(count > 0 && confirmCb.checked);
+
+        // Card visual state
+        checkboxes.forEach(cb => {
+            const card = cb.closest('.cn-note');
+            card.classList.toggle('is-selected', cb.checked);
+        });
+    }
+
+    // Card click toggles checkbox
+    document.querySelectorAll('.cn-note').forEach(card => {
+        card.addEventListener('click', function (e) {
+            if (e.target.type === 'checkbox') return;
+            const cb = card.querySelector('.note-checkbox');
+            cb.checked = !cb.checked;
+            updateState();
+        });
+    });
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updateState));
+    confirmCb.addEventListener('change', updateState);
+
+    selectAllBtn.addEventListener('click', function () {
+        checkboxes.forEach(cb => cb.checked = true);
+        updateState();
+    });
+    selectNoneBtn.addEventListener('click', function () {
+        checkboxes.forEach(cb => cb.checked = false);
+        updateState();
+    });
+
+    resetForm.addEventListener('submit', function (e) {
+        const count = document.querySelectorAll('.note-checkbox:checked').length;
+
+        if (count === 0) {
+            e.preventDefault();
+            alert('Please select at least one note.');
+            return;
+        }
+        if (!confirmCb.checked) {
+            e.preventDefault();
+            alert('Please tick the confirmation checkbox.');
+            return;
+        }
+
+        const msg = `Remove password protection from ${count} note${count > 1 ? 's' : ''}?\n\n• ${total - count} note(s) will remain protected.\n• This CANNOT be undone.`;
+        if (!confirm(msg)) { e.preventDefault(); return; }
+
+        resetBtn.classList.add('is-loading');
+        resetBtn.disabled = true;
+        resetBtnText.textContent = 'Processing…';
+    });
+
+    // Keyboard: Escape → cancel
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') window.location.href = "{{ url_for('login') }}";
+    });
+
+    updateState();
+});
+
+</script>
+{% endblock %}

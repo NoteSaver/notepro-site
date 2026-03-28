@@ -1,0 +1,646 @@
+{% extends "base.html" %}
+
+{% block title %}Register - NoteSaver Pro{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <!-- Registration Icon -->
+        <div class="register-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="register-title">Create Your Account</h1>
+        <p class="register-subtitle" id="form-instruction">
+            {% if otp_sent %}
+                <i class="fas fa-envelope-open-text me-2"></i>
+                Step 2: Verification code sent to your email
+            {% else %}
+                <i class="fas fa-clipboard-list me-2"></i>
+                Step 1: Enter your details to get started
+            {% endif %}
+        </p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'danger' else 'info-circle' }}"></i>
+                    {{ message | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Registration Form -->
+        <form method="POST" novalidate class="needs-validation" id="registrationForm">
+            {{ form.hidden_tag() }}
+            
+            {% if current_user_email %}
+                <input type="hidden" name="current_user_email" value="{{ current_user_email }}">
+            {% endif %}
+
+            <!-- Step 1: Registration Fields -->
+            <div id="registrationFormFields" style="{% if otp_sent %}display:none;{% else %}display:block;{% endif %}">
+                
+                <!-- First Name & Last Name Fields -->
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        {{ form.first_name.label(class="form-label") if form.first_name else "<label class='form-label'>First Name</label>" | safe }}
+                        <div class="input-group">
+                            <i class="fas fa-user-circle input-icon"></i>
+                            {% if form.first_name %}
+                                {{ form.first_name(class="form-control", placeholder="John") }}
+                            {% else %}
+                                <input type="text" name="first_name" class="form-control" placeholder="John" required>
+                            {% endif %}
+                        </div>
+                        {% if form.first_name and form.first_name.errors %}
+                            <div class="form-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.first_name.errors[0] }}
+                            </div>
+                        {% else %}
+                            <div class="form-hint">Your first name</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group form-group-half">
+                        {{ form.last_name.label(class="form-label") if form.last_name else "<label class='form-label'>Last Name</label>" | safe }}
+                        <div class="input-group">
+                            <i class="fas fa-user-circle input-icon"></i>
+                            {% if form.last_name %}
+                                {{ form.last_name(class="form-control", placeholder="Doe") }}
+                            {% else %}
+                                <input type="text" name="last_name" class="form-control" placeholder="Doe" required>
+                            {% endif %}
+                        </div>
+                        {% if form.last_name and form.last_name.errors %}
+                            <div class="form-error">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.last_name.errors[0] }}
+                            </div>
+                        {% else %}
+                            <div class="form-hint">Your last name</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile Number Field -->
+                <div class="form-group">
+                    {{ form.mobile_number.label(class="form-label") if form.mobile_number else "<label class='form-label'>Mobile Number</label>" | safe }}
+                    <div class="input-group">
+                        <i class="fas fa-mobile-alt input-icon"></i>
+                        {% if form.mobile_number %}
+                            {{ form.mobile_number(class="form-control", placeholder="+91 ") }}
+                        {% else %}
+                            <input type="tel" name="mobile_number" class="form-control" placeholder="+91 " required>
+                        {% endif %}
+                    </div>
+                    {% if form.mobile_number and form.mobile_number.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.mobile_number.errors[0] }}
+                        </div>
+                    {% else %}
+                        <div class="form-hint">Include country code (e.g., +91 for India)</div>
+                    {% endif %}
+                </div>
+
+                <!-- Username Field -->
+                <div class="form-group">
+                    {{ form.username.label(class="form-label") }}
+                    <div class="input-group">
+                        <i class="fas fa-user input-icon"></i>
+                        {{ form.username(class="form-control", placeholder="Choose a unique username") }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.username.errors[0] }}
+                        </div>
+                    {% else %}
+                        <div class="form-hint">4-20 characters, letters and numbers only</div>
+                    {% endif %}
+                </div>
+
+                <!-- Email Field -->
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    <div class="input-group">
+                        <i class="fas fa-envelope input-icon"></i>
+                        {{ form.email(class="form-control", placeholder="your@email.com") }}
+                    </div>
+                    {% if form.email.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.email.errors[0] }}
+                        </div>
+                    {% else %}
+                        <div class="form-hint">We'll send a verification code here</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    <div class="input-group">
+                        <i class="fas fa-lock input-icon"></i>
+                        {{ form.password(class="form-control", placeholder="Create a strong password", type="password") }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.password.errors[0] }}
+                        </div>
+                    {% else %}
+                        <div class="password-requirements">
+                            <div class="requirement">
+                                <i class="fas fa-check-circle"></i>
+                                <span>At least 8 characters</span>
+                            </div>
+                            <div class="requirement">
+                                <i class="fas fa-check-circle"></i>
+                                <span>One uppercase letter (A-Z)</span>
+                            </div>
+                            <div class="requirement">
+                                <i class="fas fa-check-circle"></i>
+                                <span>One lowercase letter (a-z)</span>
+                            </div>
+                            <div class="requirement">
+                                <i class="fas fa-check-circle"></i>
+                                <span>One number (0-9)</span>
+                            </div>
+                            <div class="requirement">
+                                <i class="fas fa-check-circle"></i>
+                                <span>One special character (!@#$%...)</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Confirm Password Field -->
+                <div class="form-group">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    <div class="input-group">
+                        <i class="fas fa-check-double input-icon"></i>
+                        {{ form.confirm_password(class="form-control", placeholder="Re-enter your password", type="password") }}
+                    </div>
+                    {% if form.confirm_password.errors %}
+                        <div class="form-error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form.confirm_password.errors[0] }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Register Button -->
+                <button type="submit" class="btn-register" name="action" value="register" id="registerButton">
+                    <i class="fas fa-paper-plane"></i>
+                    Register & Send Verification
+                </button>
+            </div>
+
+            <!-- Step 2: OTP Verification -->
+            <div id="otpVerificationFields" style="{% if otp_sent %}display:block;{% else %}display:none;{% endif %}">
+                <div class="otp-verification-box">
+                    <div class="otp-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Email Verification</h3>
+                    <p>Enter the 6-digit code sent to your email</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="otp_field" class="form-label">Verification Code</label>
+                    <div class="input-group">
+                        <i class="fas fa-key input-icon"></i>
+                        <input type="text" 
+                               id="otp_field" 
+                               name="otp" 
+                               class="form-control text-center" 
+                               placeholder="000000" 
+                               required 
+                               pattern="\d{6}" 
+                               maxlength="6"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-hint">Check your inbox and spam folder</div>
+                </div>
+
+                <button type="submit" class="btn-verify" name="action" value="verify_otp" id="verifyOtpButton">
+                    <i class="fas fa-check-circle"></i>
+                    Verify & Complete Registration
+                </button>
+
+                <div class="resend-section">
+                    <p>Didn't receive the code?</p>
+                    <button type="submit" class="btn-resend" name="action" value="resend" id="resendOtpButton">
+                        <i class="fas fa-redo"></i>
+                        Resend Code
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Footer -->
+        <div class="register-footer">
+            Already have an account? 
+            <a href="{{ url_for('login') }}" class="login-link">Sign in here</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== REGISTRATION PAGE STYLES ==================== */
+.register-container {
+    min-height: calc(100vh - var(--navbar-height) - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.register-card {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeInUp 0.6s ease;
+}
+
+body.dark-theme .register-card {
+    background: #1e293b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.register-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--success), #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+.register-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.register-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-theme .register-title {
+    color: #e2e8f0;
+}
+
+.register-subtitle {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+body.dark-theme .register-subtitle {
+    color: #94a3b8;
+}
+
+/* Form Row for Two-Column Layout */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group-half {
+    margin-bottom: 0;
+}
+
+/* Form Hints and Errors */
+.form-hint {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+    display: block;
+}
+
+body.dark-theme .form-hint {
+    color: #94a3b8;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--dark);
+}
+
+body.dark-theme .form-label {
+    color: #e2e8f0;
+}
+
+.form-error {
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Input Group Styling */
+.input-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--gray-600);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+body.dark-theme .input-icon {
+    color: #94a3b8;
+}
+
+.form-control {
+    padding-left: 40px;
+    padding-right: 12px;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+/* Password Requirements */
+.password-requirements {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--gray-50);
+    border-radius: 0.5rem;
+    border-left: 3px solid var(--primary);
+}
+
+body.dark-theme .password-requirements {
+    background: #0f172a;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.requirement:last-child {
+    margin-bottom: 0;
+}
+
+.requirement i {
+    font-size: 0.9rem;
+    color: var(--success);
+}
+
+body.dark-theme .requirement {
+    color: #94a3b8;
+}
+
+/* Register Button */
+.btn-register {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.btn-register:active {
+    transform: translateY(0);
+}
+
+/* OTP Verification Box */
+.otp-verification-box {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+}
+
+body.dark-theme .otp-verification-box {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%);
+}
+
+.otp-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.otp-icon i {
+    font-size: 1.8rem;
+    color: white;
+}
+
+.otp-verification-box h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+body.dark-theme .otp-verification-box h3 {
+    color: #e2e8f0;
+}
+
+.otp-verification-box p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+body.dark-theme .otp-verification-box p {
+    color: #94a3b8;
+}
+
+/* Verify Button */
+.btn-verify {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+/* Resend Section */
+.resend-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+body.dark-theme .resend-section {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.resend-section p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+body.dark-theme .resend-section p {
+    color: #94a3b8;
+}
+
+.btn-resend {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-resend:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Register Footer */
+.register-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+body.dark-theme .register-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+.login-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.login-link:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .register-card {
+        padding: 2.5rem 2rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-group-half {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .register-card {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+    }
+
+    .register-icon {
+        width: 70px;
+        height: 70px;
+    }
+
+    .register-icon i {
+        font-size: 2rem;
+    }
+
+    .register-title {
+        font-size: 1.5rem;
+    }
+
+    .otp-verification-box {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

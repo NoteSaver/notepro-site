@@ -1,0 +1,1053 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Dashboard - NoteSaver Pro{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-wrapper">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-3">
+
+        
+        <!-- Welcome Text -->
+        <div>
+            <h2 class="mb-0">
+                <i class="fas fa-tachometer-alt text-primary"></i> 
+                Dashboard
+                {% if current_user.is_premium_active() %}
+                    <span class="badge bg-warning">Premium</span>
+                {% endif %}
+            </h2>
+            <p class="text-muted mb-0">
+                Welcome back, 
+                <strong>
+                    {% if current_user.first_name and current_user.last_name %}
+                        {{ current_user.first_name }} {{ current_user.last_name }}
+                    {% elif current_user.first_name %}
+                        {{ current_user.first_name }}
+                    {% else %}
+                        {{ current_user.username }}
+                    {% endif %}
+                </strong>!
+            </p>
+        </div>
+    </div>
+    
+    <!-- New Note Button -->
+    <a href="{{ url_for('create_note') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Note
+    </a>
+</div>
+<!-- Suggest Upgrade to Free Users -->
+{% if not current_user.is_premium_active() %}
+<div class="alert alert-info d-flex align-items-center" role="alert">
+    <i class="fas fa-lock me-2"></i>
+    <div>
+        Unlock features like <strong>Private Notes</strong>, <strong>Password Protection</strong>, and <strong>Unlimited Notes</strong> with 
+        <a href="{{ url_for('premium') }}" class="alert-link">Premium Upgrade</a>.
+    </div>
+</div>
+{% endif %}
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Total Notes</h5>
+                        <h3>{{ current_user.get_notes_count() }}</h3>
+                    </div>
+                    <i class="fas fa-sticky-note fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Categories</h5>
+                        <h3>{{ categories|length }}</h3>
+                    </div>
+                    <i class="fas fa-tags fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Account</h5>
+                        <h6>{{ 'Premium' if current_user.is_premium_active() else 'Free' }}</h6>
+                    </div>
+                    <i class="fas fa-{{ 'crown' if current_user.is_premium_active() else 'user' }} fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>Limit</h5>
+                        <h6>{{ 'Unlimited' if current_user.is_premium_active() else current_user.get_notes_count() ~ '/5' }}</h6>
+                    </div>
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="search" 
+                       placeholder="Search notes..." value="{{ search }}">
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="category">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {{ 'selected' if cat == current_category }}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Notes Grid -->
+{% if notes.items %}
+<div class="row">
+    {% for note in notes.items %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 note-card {{ 'border-danger protected-card' if note.is_private else '' }}" data-note-id="{{ note.id }}">
+            <div class="card-header d-flex justify-content-between align-items-center {{ 'bg-light-danger' if note.is_private else '' }}">
+                <h6 class="mb-0 text-truncate note-title" style="max-width: 65%;">
+                    {% if note.is_private %}
+                        <i class="fas fa-shield-alt text-danger me-1" title="Password Protected"></i>
+                    {% endif %}
+                    {{ note.title }}
+                    {% if note.is_private %}
+                        <i class="fas fa-lock text-danger ms-1" title="Private Note"></i>
+                    {% endif %}
+                </h6>
+                {% if current_user.is_premium_active() %}
+                <div class="d-flex align-items-center gap-1">
+                    <!-- Favorite toggle -->
+                    <button class="btn btn-sm btn-outline-warning favorite-btn" 
+                            data-note-id="{{ note.id }}" data-favorite="{{ note.is_favorite }}" title="Toggle Favorite">
+                        <i class="fas fa-star {{ 'text-warning' if note.is_favorite else 'text-muted' }}"></i>
+                    </button>
+
+                    <!-- Share button -->
+                    <button class="btn btn-sm btn-outline-info share-btn" 
+                            data-note-id="{{ note.id }}" 
+                            data-note-title="{{ note.title }}"
+                            data-is-private="{{ note.is_private|lower }}"
+                            data-pdf-url="{{ url_for('download_pdf', note_id=note.id) }}"
+                            title="Share Note"
+                            aria-label="Share note {{ note.title }}">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+
+                    <!-- Private mode toggle -->
+                    <button class="btn btn-sm btn-outline-danger private-btn" 
+                            data-note-id="{{ note.id }}" 
+                            data-private="{{ note.is_private | lower }}" 
+                            title="{{ 'Remove Password Protection' if note.is_private else 'Set Password Protection' }}">
+                        <i class="fas fa-shield-alt {{ 'text-danger' if note.is_private else 'text-muted' }}"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <!-- ✅ FIXED: Use get_note_preview function for clean text display -->
+                <p class="card-text text-muted small note-preview">
+                    {% if note.is_private %}
+                        <i class="fas fa-lock me-1"></i>This note is password protected. Enter password to view content.
+                    {% else %}
+                        {{ get_note_preview(note.content, 120) }}
+                    {% endif %}
+                </p>
+                <div class="mb-2 note-badges">
+                    <span class="badge bg-secondary">{{ note.category }}</span>
+                    {% if note.is_favorite and current_user.is_premium_active() %}
+                        <span class="badge bg-warning favorite-badge"><i class="fas fa-star"></i> Favorite</span>
+                    {% endif %}
+                    {% if note.is_private %}
+                        <span class="badge bg-danger protection-badge"><i class="fas fa-shield-alt"></i> Protected</span>
+                    {% endif %}
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-clock"></i> {{ (note.updated_at + timedelta(hours=5, minutes=30)).strftime('%d %b %Y, %I:%M %p') }}
+                </small>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-1">
+                    <!-- Edit button -->
+                    <button class="btn btn-sm btn-outline-primary flex-fill protected-action-btn"
+                            data-action="edit" data-note-id="{{ note.id }}" data-url="{{ url_for('edit_note', note_id=note.id) }}"
+                            data-is-private="{{ note.is_private|lower }}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+        <!-- Download dropdown -->
+{% if current_user.is_premium_active() %}
+        <div class="dropdown me-2">
+            <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" 
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item protected-action-btn" 
+                       data-action="pdf" data-note-id="{{ note.id }}" 
+                       data-url="{{ url_for('download_pdf', note_id=note.id) }}"
+                       data-is-private="{{ note.is_private|lower }}">
+                        <i class="fas fa-file-pdf text-danger me-2"></i>PDF
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item protected-action-btn" 
+                       data-action="doc" data-note-id="{{ note.id }}" 
+                       data-url="{{ url_for('download_doc', note_id=note.id) }}"
+                       data-is-private="{{ note.is_private|lower }}">
+                        <i class="fas fa-file-word text-primary me-2"></i>DOC
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+                    <!-- Delete button -->
+                    <button class="btn btn-sm btn-outline-danger flex-fill protected-action-btn delete-btn"
+                            data-action="delete" data-note-id="{{ note.id }}" 
+                            data-url="{{ url_for('delete_note', note_id=note.id) }}"
+                            data-is-private="{{ note.is_private|lower }}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- Pagination -->
+{% if notes.pages > 1 %}
+<nav aria-label="Notes pagination">
+    <ul class="pagination justify-content-center" role="navigation" aria-label="Notes Pagination">
+        {% if notes.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('dashboard', page=notes.prev_num, category=current_category, search=search) }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in notes.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != notes.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('dashboard', page=page_num, category=current_category, search=search) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if notes.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('dashboard', page=notes.next_num, category=current_category, search=search) }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-sticky-note fa-5x text-muted mb-3"></i>
+    <h4>No notes found</h4>
+    <p class="text-muted">Start by creating your first note!</p>
+    <a href="{{ url_for('create_note') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Note
+    </a>
+</div>
+{% endif %}
+<!-- ══ Delete Confirmation Modal ══ -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto" style="max-width: 420px; width: auto;">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+
+            <!-- Animated danger header -->
+            <div style="
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 4vw, 1.5rem) 1.5rem;
+                text-align: center;
+                position: relative;
+            ">
+                <!-- Decorative rings -->
+                <div style="position: absolute; inset: 0; overflow: hidden; opacity: .15;">
+                    <div style="position:absolute;top:-20px;left:-20px;width:120px;height:120px;border-radius:50%;background:#fff;"></div>
+                    <div style="position:absolute;bottom:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:#fff;"></div>
+                </div>
+
+                <!-- Trash icon with pulse ring -->
+                <div style="position:relative;display:inline-block;margin-bottom:.75rem;">
+                    <div style="
+                        position:absolute;inset:-8px;border-radius:50%;
+                        background:rgba(255,255,255,.25);
+                        animation:deletePulse 1.8s ease infinite;
+                    "></div>
+                    <div style="
+                        width:clamp(52px,10vw,64px);height:clamp(52px,10vw,64px);border-radius:50%;
+                        background:rgba(255,255,255,.2);
+                        display:flex;align-items:center;justify-content:center;
+                        border:2px solid rgba(255,255,255,.5);
+                        position:relative;
+                    ">
+                        <i class="fas fa-trash-alt" style="font-size:clamp(1.3rem,4vw,1.7rem);color:#fff;"></i>
+                    </div>
+                </div>
+
+                <h5 id="deleteConfirmModalLabel" style="color:#fff;font-weight:700;margin:0;font-size:clamp(1rem,3.5vw,1.15rem);">
+                    Delete Note?
+                </h5>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body text-center px-3 px-sm-4 py-3 py-sm-4">
+                <p class="mb-1" style="font-size:clamp(.85rem,3vw,.95rem);color:#374151;font-weight:500;">
+                    Are you sure you want to delete
+                </p>
+                <p class="mb-3">
+                    <span id="deleteNoteTitle" style="
+                        font-size:clamp(.85rem,3vw,.95rem);font-weight:700;color:#111827;
+                        background:#fef2f2;padding:.2rem .6rem;border-radius:6px;
+                        border:1px solid #fecaca;word-break:break-word;display:inline-block;max-width:100%;
+                    "></span>
+                </p>
+                <div style="
+                    background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;
+                    padding:.65rem .9rem;display:flex;align-items:flex-start;gap:.5rem;text-align:left;
+                ">
+                    <i class="fas fa-exclamation-triangle" style="color:#f97316;margin-top:2px;flex-shrink:0;font-size:.85rem;"></i>
+                    <span style="font-size:clamp(.78rem,2.8vw,.82rem);color:#92400e;line-height:1.5;">
+                        This action <strong>cannot be undone</strong>. The note will be permanently removed from your account.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-3 px-sm-4 pb-4 pt-0 gap-2 justify-content-center flex-nowrap">
+                <button type="button" class="btn btn-light flex-fill flex-sm-grow-0 px-3 px-sm-4" data-bs-dismiss="modal" style="border-radius:10px;font-weight:500;min-width:0;max-width:160px;">
+                    <i class="fas fa-times me-1"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger flex-fill flex-sm-grow-0 px-3 px-sm-4" id="confirmDeleteBtn" style="
+                    border-radius:10px;font-weight:600;min-width:0;max-width:160px;
+                    background:linear-gradient(135deg,#ef4444,#dc2626);
+                    border:none;box-shadow:0 4px 15px rgba(239,68,68,.4);
+                ">
+                    <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                    <i class="fas fa-trash-alt me-1"></i> Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes deletePulse {
+    0%   { transform: scale(1);   opacity: .6; }
+    70%  { transform: scale(1.55); opacity: 0; }
+    100% { opacity: 0; }
+}
+</style>
+
+<!-- Password Verification Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">
+                    <i class="fas fa-lock text-danger me-2"></i>Password Required
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This note is password protected. Please enter your password to continue.
+                </div>
+                <form id="passwordForm">
+                    <div class="mb-3">
+                        <label for="notePassword" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="notePassword" required 
+                                   placeholder="Enter your password" autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength mt-2" id="notePasswordStrength"></div>
+                    </div>
+                    <div class="alert alert-danger d-none" id="passwordError"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="verifyPassword">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <i class="fas fa-unlock me-1"></i>Verify Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Set Private Password Modal -->
+<div class="modal fade" id="setPrivatePasswordModal" tabindex="-1" aria-labelledby="setPrivateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="setPrivateModalLabel">
+                    <i class="fas fa-shield-alt text-warning me-2"></i>Set Password Protection
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Setting a password will protect this note. You'll need to enter this password to view, edit, or delete the note.
+                </div>
+                <form id="setPasswordForm">
+                    <input type="hidden" id="noteIdForPrivate" />
+                    <div class="mb-3">
+                        <label for="newPassword1" class="form-label">New Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="newPassword1" required 
+                                   minlength="6" placeholder="Minimum 6 characters" autocomplete="new-password">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength mt-2" id="newPassword1Strength"></div>
+                        <div class="form-text">Password strength: <span id="strengthText">Enter password</span></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword2" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="newPassword2" required 
+                                   minlength="6" placeholder="Re-enter password" autocomplete="new-password">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger d-none" id="passwordMismatch"></div>
+                    <div class="alert alert-success d-none" id="passwordMatch">
+                        <i class="fas fa-check-circle me-2"></i>Passwords match!
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="setPassword" disabled>
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <i class="fas fa-shield-alt me-1"></i>Set Protection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Remove Password Modal -->
+<div class="modal fade" id="removePasswordModal" tabindex="-1" aria-labelledby="removePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="removePasswordModalLabel">
+                    <i class="fas fa-shield-alt text-danger me-2"></i>Remove Password Protection
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Enter your current password to remove protection from this note.
+                </div>
+                <form id="removePasswordForm">
+                    <input type="hidden" id="noteIdForRemove" />
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="currentPassword" required 
+                                   placeholder="Enter current password" autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength mt-2" id="currentPasswordStrength"></div>
+                    </div>
+                    <div class="mb-2">
+                        <button type="button" class="btn btn-link p-0 text-primary small" id="forgotPasswordTrigger">
+                            <i class="fas fa-question-circle me-1"></i>Forgot Password?
+                        </button>
+                    </div>
+                    <div class="alert alert-danger d-none" id="removePasswordError"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="removePassword">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <i class="fas fa-unlock me-1"></i>Remove Protection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ══ Share Note Modal ══ -->
+<div class="modal fade" id="shareNoteModal" tabindex="-1" aria-labelledby="shareNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto" style="max-width:460px;width:auto;">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#0ea5e9,#2563eb);padding:1.5rem 1.5rem 1.25rem;position:relative;">
+                <div style="position:absolute;inset:0;overflow:hidden;opacity:.12;">
+                    <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:#fff;"></div>
+                </div>
+                <div class="d-flex align-items-center gap-3" style="position:relative;">
+                    <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-share-alt" style="color:#fff;font-size:1.1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 id="shareNoteModalLabel" style="color:#fff;font-weight:700;margin:0;font-size:1rem;">Share Note</h5>
+                        <p id="shareNoteTitle" style="color:rgba(255,255,255,.8);font-size:.8rem;margin:0;" class="text-truncate"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+                    style="position:absolute;top:1rem;right:1rem;"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-3">
+
+                <!-- Copy Link -->
+                <p class="mb-2" style="font-size:.82rem;font-weight:600;color:#6b7280;">🔗 Share Link</p>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control form-control-sm" id="shareNoteLink" readonly
+                           style="font-size:.8rem;background:#f9fafb;">
+                    <button class="btn btn-outline-secondary btn-sm" id="copyShareLinkBtn" type="button">
+                        <i class="fas fa-copy me-1"></i>Copy
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <hr class="flex-fill m-0"><span style="font-size:.75rem;color:#9ca3af;">or download directly</span><hr class="flex-fill m-0">
+                </div>
+
+                <!-- Download buttons -->
+                <div class="d-grid gap-2" id="shareDownloadBtns">
+                    <a id="sharePdfBtn" href="#" class="btn btn-sm btn-outline-danger" target="_blank">
+                        <i class="fas fa-file-pdf me-2"></i>Download as PDF
+                    </a>
+                </div>
+
+                <!-- Private note warning -->
+                <div id="sharePrivateWarning" class="alert alert-warning d-none mt-3 mb-0 py-2" style="font-size:.8rem;">
+                    <i class="fas fa-lock me-1"></i>
+                    This note is password protected. Downloads require password verification from dashboard.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Share button click — populate and open modal
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.share-btn');
+        if (!btn) return;
+
+        const noteId    = btn.dataset.noteId;
+        const noteTitle = btn.dataset.noteTitle || 'Note';
+        const isPrivate = btn.dataset.isPrivate === 'true';
+        const pdfUrl    = btn.dataset.pdfUrl;
+        const docUrl    = btn.dataset.docUrl;
+
+        // Populate modal
+        document.getElementById('shareNoteTitle').textContent = noteTitle;
+        document.getElementById('shareNoteLink').value = window.location.origin + '/share/note/' + noteId;
+        document.getElementById('sharePdfBtn').href = pdfUrl;
+
+        // Show/hide download buttons and warning for private notes
+        const dlBtns = document.getElementById('shareDownloadBtns');
+        const warning = document.getElementById('sharePrivateWarning');
+        if (isPrivate) {
+            dlBtns.classList.add('d-none');
+            warning.classList.remove('d-none');
+        } else {
+            dlBtns.classList.remove('d-none');
+            warning.classList.add('d-none');
+        }
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('shareNoteModal')).show();
+    });
+
+    // Copy link button
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#copyShareLinkBtn')) return;
+        const input = document.getElementById('shareNoteLink');
+        input.select();
+        try {
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('copyShareLinkBtn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+                btn.classList.replace('btn-outline-secondary', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.replace('btn-success', 'btn-outline-secondary');
+                }, 2000);
+            });
+        } catch {
+            document.execCommand('copy');
+        }
+    });
+})();
+</script>
+
+<!-- ══ Download Options Modal ══ -->
+<div class="modal fade" id="downloadOptionsModal" tabindex="-1" aria-labelledby="downloadOptionsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-3 mx-sm-auto" style="max-width:400px;width:auto;">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:1.4rem 1.5rem 1.2rem;position:relative;">
+                <div style="position:absolute;inset:0;overflow:hidden;opacity:.12;">
+                    <div style="position:absolute;bottom:-30px;right:-20px;width:130px;height:130px;border-radius:50%;background:#fff;"></div>
+                </div>
+                <div class="d-flex align-items-center gap-3" style="position:relative;">
+                    <div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-download" style="color:#fff;font-size:1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 id="downloadOptionsLabel" style="color:#fff;font-weight:700;margin:0;font-size:1rem;">Download Options</h5>
+                        <p id="downloadOptionsNoteName" style="color:rgba(255,255,255,.75);font-size:.78rem;margin:0;" class="text-truncate"></p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+                    style="position:absolute;top:1rem;right:1rem;"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 py-3">
+                <p class="mb-3" style="font-size:.82rem;color:#6b7280;font-weight:500;">File mein kya include karna hai?</p>
+
+                <div class="d-flex flex-column gap-2">
+                    <!-- Title -->
+                    <label class="d-flex align-items-center gap-3 p-3 rounded-3 border" id="opt-title-wrap"
+                           style="cursor:pointer;transition:background .15s;">
+                        <input type="checkbox" id="dlOptTitle" checked class="form-check-input m-0 dl-checkbox">
+                        <div>
+                            <div style="font-size:.88rem;font-weight:600;" class="dl-opt-label">Note Title</div>
+                            <div style="font-size:.75rem;color:#9ca3af;" class="dl-opt-desc">File ke top pe note ka naam</div>
+                        </div>
+                    </label>
+
+                    <!-- Metadata -->
+                    <label class="d-flex align-items-center gap-3 p-3 rounded-3 border" id="opt-meta-wrap"
+                           style="cursor:pointer;transition:background .15s;">
+                        <input type="checkbox" id="dlOptMeta" checked class="form-check-input m-0 dl-checkbox">
+                        <div>
+                            <div style="font-size:.88rem;font-weight:600;" class="dl-opt-label">Category & Dates</div>
+                            <div style="font-size:.75rem;color:#9ca3af;" class="dl-opt-desc">Category, created aur updated date</div>
+                        </div>
+                    </label>
+
+                    <!-- Footer -->
+                    <label class="d-flex align-items-center gap-3 p-3 rounded-3 border" id="opt-footer-wrap"
+                           style="cursor:pointer;transition:background .15s;">
+                        <input type="checkbox" id="dlOptFooter" checked class="form-check-input m-0 dl-checkbox">
+                        <div>
+                            <div style="font-size:.88rem;font-weight:600;" class="dl-opt-label">Generated By Footer</div>
+                            <div style="font-size:.75rem;color:#9ca3af;" class="dl-opt-desc">"Generated by NoteSaver Pro" line</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-light flex-fill" data-bs-dismiss="modal"
+                    style="border-radius:10px;font-weight:500;">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary flex-fill" id="confirmDownloadBtn"
+                    style="border-radius:10px;font-weight:600;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;">
+                    <i class="fas fa-download me-1"></i>Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Light mode hover ── */
+#opt-title-wrap:hover, #opt-meta-wrap:hover, #opt-footer-wrap:hover {
+    background: #f0f7ff;
+}
+
+/* ── Download options modal — Dark mode ── */
+body.dark-theme #downloadOptionsModal .modal-content {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.08);
+}
+body.dark-theme #downloadOptionsModal .modal-body {
+    background: #1e293b;
+}
+body.dark-theme #downloadOptionsModal .modal-footer {
+    background: #1e293b;
+    border-top-color: rgba(255,255,255,0.08);
+}
+
+/* Label rows */
+body.dark-theme #downloadOptionsModal label.border {
+    background: #0f172a !important;
+    border-color: rgba(255,255,255,0.12) !important;
+}
+body.dark-theme #downloadOptionsModal label.border:hover {
+    background: #1e293b !important;
+    border-color: rgba(255,255,255,0.22) !important;
+}
+
+/* Text */
+body.dark-theme #downloadOptionsModal .dl-opt-label { color: #e2e8f0; }
+body.dark-theme #downloadOptionsModal .dl-opt-desc  { color: #64748b !important; }
+body.dark-theme #downloadOptionsModal > .modal-dialog > .modal-content > .modal-body > p {
+    color: #94a3b8 !important;
+}
+
+/* ── Checkbox — base size (light + dark) ── */
+.dl-checkbox {
+    width: 1.15rem !important;
+    height: 1.15rem !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+/* ── Checkbox — dark mode fix ── */
+body.dark-theme .dl-checkbox {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 1.15rem !important;
+    height: 1.15rem !important;
+    border: 2px solid #475569 !important;
+    border-radius: 4px !important;
+    background-color: #0f172a !important;
+    background-image: none !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s, border-color .15s;
+    display: inline-block;
+    vertical-align: middle;
+}
+body.dark-theme .dl-checkbox:checked {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3.5 3.5L13 4'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 75% !important;
+}
+body.dark-theme .dl-checkbox:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.45) !important;
+    border-color: #3b82f6 !important;
+}
+
+/* Cancel button */
+body.dark-theme #downloadOptionsModal .btn-light {
+    background: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+body.dark-theme #downloadOptionsModal .btn-light:hover {
+    background: #475569;
+    color: #f1f5f9;
+}
+</style>
+
+
+
+<!-- Success/Error Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11;">
+    <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>
+                <span id="successMessage"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+{# Include forgot-note-password modal partial #}
+{% include 'components/forgot_note_password_modal.html' %}
+
+<!-- ══ Floating Support Button ══ -->
+<a href="{{ url_for('support') }}" id="supportFAB"
+   title="Contact Support"
+   style="
+     position:fixed; bottom:2rem; right:2rem; z-index:1000;
+     width:58px; height:58px; border-radius:50%;
+     background:linear-gradient(135deg,#2563eb,#7c3aed);
+     color:#fff; text-decoration:none;
+     display:flex; align-items:center; justify-content:center;
+     font-size:1.3rem;
+     box-shadow:0 8px 25px rgba(37,99,235,.4);
+     transition:transform .25s, box-shadow .25s;
+     animation:fabIn .5s cubic-bezier(.34,1.56,.64,1) both;
+   "
+   onmouseover="this.style.transform='scale(1.12) translateY(-3px)';this.style.boxShadow='0 14px 35px rgba(37,99,235,.5)';"
+   onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 25px rgba(37,99,235,.4)';">
+    <i class="fas fa-headset"></i>
+    <span style="
+      position:absolute; inset:0; border-radius:50%;
+      border:2px solid rgba(37,99,235,.4);
+      animation:fabPulse 2s ease infinite;
+    "></span>
+</a>
+
+<style>
+@keyframes fabIn    { from{opacity:0;transform:scale(0)} to{opacity:1;transform:scale(1)} }
+@keyframes fabPulse { 0%{transform:scale(1);opacity:.8} 70%{transform:scale(1.6);opacity:0} 100%{opacity:0} }
+</style>
+
+
+<style>
+/* ══════════════════════════════════════════
+   DARK MODE — Modal & UI Fixes
+══════════════════════════════════════════ */
+body.dark-theme .modal-content {
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e2e8f0;
+}
+
+body.dark-theme .modal-header {
+    border-bottom-color: rgba(255,255,255,0.1);
+    background: #1e293b;
+}
+
+body.dark-theme .modal-title {
+    color: #e2e8f0;
+}
+
+body.dark-theme .modal-body {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-theme .modal-footer {
+    background: #1e293b;
+    border-top-color: rgba(255,255,255,0.1);
+}
+
+/* Form controls in dark mode */
+body.dark-theme .form-control,
+body.dark-theme .form-select {
+    background: #0f172a;
+    border-color: rgba(255,255,255,0.15);
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    background: #0f172a;
+    border-color: #2563eb;
+    color: #e2e8f0;
+    box-shadow: 0 0 0 0.2rem rgba(37,99,235,0.25);
+}
+
+body.dark-theme .form-control::placeholder {
+    color: #64748b;
+}
+
+body.dark-theme .form-control[readonly] {
+    background: #0f172a;
+    color: #94a3b8;
+}
+
+/* Input group button in dark mode */
+body.dark-theme .input-group .btn-outline-secondary {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.15);
+    color: #94a3b8;
+}
+
+body.dark-theme .input-group .btn-outline-secondary:hover {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+/* Alert boxes in dark mode */
+body.dark-theme .alert-info {
+    background: rgba(37,99,235,0.15);
+    border-color: rgba(37,99,235,0.3);
+    color: #93c5fd;
+}
+
+body.dark-theme .alert-warning {
+    background: rgba(245,158,11,0.15);
+    border-color: rgba(245,158,11,0.3);
+    color: #fcd34d;
+}
+
+body.dark-theme .alert-danger {
+    background: rgba(239,68,68,0.15);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
+}
+
+body.dark-theme .alert-success {
+    background: rgba(16,185,129,0.15);
+    border-color: rgba(16,185,129,0.3);
+    color: #6ee7b7;
+}
+
+/* Labels and text in modals */
+body.dark-theme .form-label {
+    color: #cbd5e1;
+}
+
+body.dark-theme .form-text {
+    color: #64748b;
+}
+
+body.dark-theme .btn-close {
+    filter: invert(1);
+}
+
+/* Secondary button in dark mode */
+body.dark-theme .btn-secondary {
+    background: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-secondary:hover {
+    background: #475569;
+    border-color: #64748b;
+}
+
+/* Light button in dark mode (delete modal Cancel) */
+body.dark-theme .btn-light {
+    background: #334155;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-light:hover {
+    background: #475569;
+    color: #f1f5f9;
+}
+
+/* Delete modal body text */
+body.dark-theme #deleteNoteTitle {
+    background: rgba(239,68,68,0.15) !important;
+    border-color: rgba(239,68,68,0.3) !important;
+    color: #fca5a5 !important;
+}
+
+body.dark-theme .modal-body [style*="background:#fff7ed"] {
+    background: rgba(249,115,22,0.12) !important;
+    border-color: rgba(249,115,22,0.3) !important;
+}
+
+body.dark-theme .modal-body [style*="color:#92400e"] {
+    color: #fcd34d !important;
+}
+
+body.dark-theme .modal-body [style*="color:#374151"],
+body.dark-theme .modal-body [style*="color:#111827"] {
+    color: #e2e8f0 !important;
+}
+
+/* Share modal body */
+body.dark-theme #shareNoteLink {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+}
+
+body.dark-theme [style*="color:#6b7280"] {
+    color: #94a3b8 !important;
+}
+
+body.dark-theme [style*="color:#9ca3af"] {
+    color: #64748b !important;
+}
+
+body.dark-theme .modal-body hr {
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* Divider text in share modal */
+body.dark-theme .modal-body span[style*="color:#9ca3af"] {
+    color: #64748b !important;
+}
+
+/* Password strength bar background */
+body.dark-theme .password-strength {
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+}
+
+/* btn-link in dark mode */
+body.dark-theme .btn-link {
+    color: #60a5fa;
+}
+
+body.dark-theme .btn-link:hover {
+    color: #93c5fd;
+}
+</style>
+
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/forgot-note-password.js') }}"></script>
+{% endblock %}

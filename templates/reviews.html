@@ -1,0 +1,1120 @@
+{% extends "base.html" %}
+
+{% block title %}User Reviews - NoteSaver Pro{% endblock %}
+
+{% block content %}
+<style>
+    /* ===== REVIEWS PAGE — matches index.html design system ===== */
+
+    /* Full-width sections */
+    .full-width-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* ===== HERO BANNER ===== */
+    .reviews-hero {
+        padding: 4rem 0 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .reviews-hero::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -5%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .reviews-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    .reviews-hero-inner {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .reviews-hero h1 {
+        font-size: 2.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 1rem;
+        animation: slideInDown 0.7s ease-out;
+    }
+
+    .reviews-hero h1 span {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .reviews-hero p {
+        font-size: 1.1rem;
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+        line-height: 1.7;
+        animation: slideInDown 0.7s ease-out 0.15s both;
+    }
+
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+        background: white;
+        border-top: 1px solid var(--gray-200);
+        border-bottom: 1px solid var(--gray-200);
+        padding: 1.5rem 0;
+    }
+
+    .stats-bar-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 4rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .stat-item:nth-child(2) { animation-delay: 0.1s; }
+    .stat-item:nth-child(3) { animation-delay: 0.2s; }
+    .stat-item:nth-child(4) { animation-delay: 0.3s; }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        font-family: 'Poppins', sans-serif;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--gray-600);
+        margin-top: 0.25rem;
+    }
+
+    /* ===== RATING SUMMARY ===== */
+    .rating-summary-section {
+        padding: 3rem 0 1rem;
+        background: white;
+    }
+
+    .rating-summary-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .big-rating {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+        border: 1px solid var(--gray-200);
+        border-radius: 1.25rem;
+    }
+
+    .big-rating-num {
+        font-size: 4.5rem;
+        font-weight: 800;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+        line-height: 1;
+    }
+
+    .stars-row {
+        display: flex;
+        justify-content: center;
+        gap: 0.2rem;
+        margin: 0.5rem 0;
+    }
+
+    .stars-row i {
+        color: #f59e0b;
+        font-size: 1.2rem;
+    }
+
+    .rating-count {
+        font-size: 0.85rem;
+        color: var(--gray-600);
+    }
+
+    .rating-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .rating-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .rating-bar-label {
+        width: 40px;
+        text-align: right;
+        color: var(--gray-600);
+        flex-shrink: 0;
+    }
+
+    .rating-bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--gray-200);
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .rating-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 50px;
+        transition: width 1.2s ease;
+    }
+
+    .rating-bar-pct {
+        width: 35px;
+        font-size: 0.82rem;
+        color: var(--gray-600);
+        flex-shrink: 0;
+    }
+
+    /* ===== FILTER TABS ===== */
+    .filter-section {
+        background: white;
+        padding: 1.5rem 0;
+        position: sticky;
+        top: var(--navbar-height);
+        z-index: 100;
+        border-bottom: 1px solid var(--gray-200);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .filter-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        white-space: nowrap;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        border: 1.5px solid var(--gray-200);
+        background: white;
+        color: var(--gray-600);
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .filter-tab.active-star {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border-color: #f59e0b;
+        color: white;
+    }
+
+    /* ===== REVIEWS GRID ===== */
+    .reviews-section {
+        padding: 3rem 0 5rem;
+        background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+    }
+
+    .reviews-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .reviews-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .review-card {
+        background: white;
+        border-radius: 1.25rem;
+        padding: 1.75rem;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .review-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .review-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1);
+        border-color: var(--primary);
+    }
+
+    .review-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    /* Featured card */
+    .review-card.featured {
+        border-color: rgba(245, 158, 11, 0.4);
+        background: linear-gradient(135deg, #fffbeb 0%, white 60%);
+        grid-column: span 2;
+    }
+
+    .review-card.featured::before {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+        transform: scaleX(1);
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .review-header {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .reviewer-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        flex-shrink: 0;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .reviewer-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .reviewer-name {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .reviewer-meta {
+        font-size: 0.78rem;
+        color: var(--gray-600);
+        margin-top: 0.1rem;
+    }
+
+    .review-stars {
+        display: flex;
+        gap: 0.15rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .review-stars i {
+        font-size: 0.9rem;
+        color: #f59e0b;
+    }
+
+    .review-stars i.empty {
+        color: var(--gray-300);
+    }
+
+    .review-title {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .review-text {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        line-height: 1.65;
+    }
+
+    .review-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1.25rem;
+        padding-top: 0.875rem;
+        border-top: 1px solid var(--gray-100);
+    }
+
+    .review-plan-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.4rem;
+    }
+
+    .plan-free {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .plan-premium {
+        background: rgba(245, 158, 11, 0.12);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .review-helpful {
+        font-size: 0.78rem;
+        color: var(--gray-400, #9ca3af);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .review-helpful:hover {
+        color: var(--primary);
+    }
+
+    /* ===== DELETE BUTTON ===== */
+    .btn-delete-review {
+        font-size: 0.78rem;
+        color: var(--danger, #ef4444);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: pointer;
+        transition: color 0.2s, background 0.2s;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.2);
+        padding: 0.25rem 0.65rem;
+        border-radius: 0.4rem;
+        font-weight: 600;
+    }
+
+    .btn-delete-review:hover {
+        background: rgba(239,68,68,0.18);
+        color: #dc2626;
+    }
+
+    /* ===== LOGIN REQUIRED TOAST ===== */
+    .login-required-toast {
+        position: fixed;
+        top: 80px;
+        right: 1.5rem;
+        background: white;
+        border-left: 4px solid var(--primary);
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        padding: 1rem 1.25rem;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        max-width: 340px;
+        animation: slideInRight 0.4s ease;
+        transition: opacity 0.3s;
+    }
+
+    body.dark-theme .login-required-toast {
+        background: #1e293b;
+        color: #e2e8f0;
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(60px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .login-required-toast i {
+        font-size: 1.4rem;
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .login-required-toast .toast-msg {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--dark);
+        flex: 1;
+    }
+
+    body.dark-theme .login-required-toast .toast-msg { color: #e2e8f0; }
+
+    .login-required-toast .toast-msg a {
+        color: var(--primary);
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    .login-required-toast .toast-close {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        color: var(--gray-400);
+        padding: 0;
+    }
+
+    /* ===== WRITE REVIEW CTA ===== */
+    .write-review-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .write-review-section::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -5%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 12s ease-in-out infinite;
+    }
+
+    .write-review-inner {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .write-review-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        margin-bottom: 0.75rem;
+    }
+
+    .write-review-section p {
+        color: rgba(255,255,255,0.7);
+        font-size: 1rem;
+        margin-bottom: 1.75rem;
+        line-height: 1.6;
+    }
+
+    /* ===== WRITE REVIEW MODAL ===== */
+    .modal-header.review-modal-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border: none;
+    }
+
+    .star-input {
+        display: flex;
+        gap: 0.5rem;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    .star-input input { display: none; }
+
+    .star-input label {
+        font-size: 1.8rem;
+        color: var(--gray-300);
+        cursor: pointer;
+        transition: color 0.15s;
+    }
+
+    .star-input label:hover,
+    .star-input label:hover ~ label,
+    .star-input input:checked ~ label {
+        color: #f59e0b;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== DARK THEME ===== */
+    body.dark-theme .reviews-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    body.dark-theme .reviews-hero h1 { color: #f1f5f9; }
+    body.dark-theme .reviews-hero p  { color: #cbd5e1; }
+
+    body.dark-theme .stats-bar,
+    body.dark-theme .rating-summary-section {
+        background: #1e293b;
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    body.dark-theme .big-rating {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    body.dark-theme .big-rating-num { color: #f1f5f9; }
+
+    body.dark-theme .filter-section {
+        background: #1e293b;
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    body.dark-theme .filter-tab {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .reviews-section {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    body.dark-theme .review-card {
+        background: rgba(255,255,255,0.04);
+        border-color: rgba(255,255,255,0.08);
+    }
+
+    body.dark-theme .review-card.featured {
+        background: rgba(245,158,11,0.06);
+        border-color: rgba(245,158,11,0.3);
+    }
+
+    body.dark-theme .reviewer-name,
+    body.dark-theme .review-title { color: #f1f5f9; }
+
+    body.dark-theme .reviewer-meta,
+    body.dark-theme .review-text  { color: #94a3b8; }
+
+    body.dark-theme .review-footer { border-color: rgba(255,255,255,0.08); }
+
+    body.dark-theme .rating-bar-track { background: rgba(255,255,255,0.1); }
+    body.dark-theme .stat-label,
+    body.dark-theme .rating-count,
+    body.dark-theme .rating-bar-pct,
+    body.dark-theme .rating-bar-label { color: #94a3b8; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .reviews-hero h1 { font-size: 2rem; }
+        .stats-bar-inner { gap: 2rem; }
+        .rating-summary-inner { grid-template-columns: 1fr; gap: 1.5rem; }
+        .reviews-grid { grid-template-columns: 1fr; }
+        .review-card.featured { grid-column: span 1; }
+        .filter-inner { gap: 0.5rem; }
+    }
+
+    @media (max-width: 480px) {
+        .reviews-hero h1 { font-size: 1.7rem; }
+        .big-rating-num { font-size: 3.5rem; }
+    }
+</style>
+
+<!-- HERO -->
+<section class="reviews-hero full-width-section">
+    <div class="reviews-hero-inner">
+        <h1>What Our Users <span>Are Saying</span></h1>
+        <p>Real reviews from real people — students, professionals, and teams who use NoteSaver Pro every day.</p>
+        <button class="btn-hero btn-primary-hero btn-write-review-guard"
+                style="display:inline-block; padding:0.85rem 2rem; font-size:1rem; border-radius:0.5rem; font-weight:600; text-decoration:none; border:none; cursor:pointer; transition:all 0.3s cubic-bezier(0.4,0,0.2,1); background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color:white; box-shadow:0 4px 15px rgba(37,99,235,0.3);">
+            <i class="fas fa-pen-fancy me-2"></i>Write a Review
+        </button>
+    </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar full-width-section">
+    <div class="stats-bar-inner">
+        <div class="stat-item">
+            <div class="stat-number">{{ avg_rating if total > 0 else "—" }}</div>
+            <div class="stat-label">Average Rating</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ total }}</div>
+            <div class="stat-label">Total Reviews</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">
+                {%- if total > 0 -%}{{ (bar_pct[4] + bar_pct[5]) }}%{%- else -%}—{%- endif -%}
+            </div>
+            <div class="stat-label">4-5 Star Ratings</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">50K+</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+</div>
+
+<!-- RATING SUMMARY -->
+<section class="rating-summary-section full-width-section">
+    <div class="rating-summary-inner">
+        <div class="big-rating" data-aos="fade-right">
+            <div class="big-rating-num">{{ avg_rating if total > 0 else "—" }}</div>
+            <div class="stars-row">
+                {% set full = avg_rating | int %}
+                {% set half = 1 if (avg_rating - full) >= 0.5 else 0 %}
+                {% for i in range(full) %}<i class="fas fa-star"></i>{% endfor %}
+                {% if half %}<i class="fas fa-star-half-alt"></i>{% endif %}
+                {% for i in range(5 - full - half) %}<i class="far fa-star"></i>{% endfor %}
+            </div>
+            <div class="rating-count">Based on {{ total }} review{{ 's' if total != 1 else '' }}</div>
+        </div>
+        <div class="rating-bars" data-aos="fade-left">
+            {% for star in [5,4,3,2,1] %}
+            <div class="rating-bar-row">
+                <span class="rating-bar-label">{{ star }} ★</span>
+                <div class="rating-bar-track"><div class="rating-bar-fill" style="width: {{ bar_pct[star] }}%"></div></div>
+                <span class="rating-bar-pct">{{ bar_pct[star] }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- FILTER TABS -->
+<div class="filter-section full-width-section">
+    <div class="filter-inner">
+        <span class="filter-label">Filter:</span>
+        <div class="filter-tabs">
+            <a href="{{ url_for('reviews') }}" class="filter-tab {% if star_filter=='all' and plan_filter=='all' %}active{% endif %}">All ({{ total }})</a>
+            <a href="{{ url_for('reviews', stars=5) }}" class="filter-tab {% if star_filter=='5' %}active{% endif %}">⭐ 5 Star</a>
+            <a href="{{ url_for('reviews', stars=4) }}" class="filter-tab {% if star_filter=='4' %}active{% endif %}">⭐ 4 Star</a>
+            <a href="{{ url_for('reviews', stars=3) }}" class="filter-tab {% if star_filter=='3' %}active{% endif %}">⭐ 3 Star</a>
+            <a href="{{ url_for('reviews', plan='premium') }}" class="filter-tab {% if plan_filter=='premium' %}active{% endif %}">👑 Premium</a>
+            <a href="{{ url_for('reviews', plan='free') }}" class="filter-tab {% if plan_filter=='free' %}active{% endif %}">Free Plan</a>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEWS GRID -->
+<section class="reviews-section full-width-section">
+    <div class="reviews-inner">
+        <div class="reviews-grid" id="reviewsGrid">
+
+            {% if reviews %}
+                {% for review in reviews %}
+                {% set colors = ['#2563eb,#1e40af','#10b981,#059669','#f59e0b,#d97706','#8b5cf6,#6d28d9','#ef4444,#dc2626','#06b6d4,#0891b2'] %}
+                {% set color = colors[loop.index0 % colors|length] %}
+                {% set initial = review.name[0] | upper %}
+                <div class="review-card {% if loop.first %}featured{% endif %}"
+                     data-stars="{{ review.rating }}"
+                     data-plan="{{ review.plan or 'free' }}"
+                     data-id="{{ review.id }}"
+                     style="animation-delay: {{ loop.index0 * 0.05 }}s">
+
+                    {% if loop.first %}
+                    <span class="featured-badge"><i class="fas fa-crown me-1"></i>Top Review</span>
+                    {% endif %}
+
+                    <div class="review-header">
+                        <div class="reviewer-avatar" style="background: linear-gradient(135deg, {{ color }});">
+                            {{ initial }}
+                        </div>
+                        <div class="reviewer-info">
+                            <div class="reviewer-name">{{ review.name }}</div>
+                            <div class="reviewer-meta">{{ review.created_at.strftime('%d %b %Y') if review.created_at }}</div>
+                        </div>
+                    </div>
+
+                    <div class="review-stars">
+                        {% for i in range(1, 6) %}
+                            <i class="fas fa-star{% if i > review.rating %} empty{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+
+                    <div class="review-title">{{ review.title }}</div>
+                    <div class="review-text">{{ review.body }}</div>
+
+                    <div class="review-footer">
+                        {% if review.plan == 'premium' %}
+                            <span class="review-plan-badge plan-premium"><i class="fas fa-crown me-1"></i>Premium</span>
+                        {% else %}
+                            <span class="review-plan-badge plan-free">Free Plan</span>
+                        {% endif %}
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <button class="review-helpful" data-id="{{ review.id }}">
+                                <i class="fas fa-thumbs-up"></i> Helpful ({{ review.helpful }})
+                            </button>
+                            {% if current_user.is_authenticated and current_user.id == review.user_id %}
+                            <button class="btn-delete-review"
+                                    data-id="{{ review.id }}"
+                                    onclick="deleteReview(this, '{{ review.id }}')">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 w-100" style="grid-column: 1/-1;">
+                    <i class="fas fa-star fa-3x text-muted mb-3 d-block"></i>
+                    <h5 class="text-muted">Abhi koi review nahi hai</h5>
+                    <p class="text-muted">Pehle review likhne wale banein!</p>
+                    <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#writeReviewModal">
+                        <i class="fas fa-pen me-2"></i>Pehla Review Likho
+                    </button>
+                </div>
+            {% endif %}
+
+        <!-- Total count -->
+        {% if reviews %}
+        <div class="text-center mt-4 text-muted" style="font-size:0.9rem;">
+            {{ reviews|length }} review{{ 's' if reviews|length != 1 else '' }} dikh rahe hain
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- WRITE REVIEW CTA -->
+<section class="write-review-section full-width-section">
+    <div class="write-review-inner">
+        <h2>Loved Using NoteSaver Pro?</h2>
+        <p>Share your experience and help others discover the best note-taking tool.</p>
+        <button class="btn-hero btn-primary-hero btn-write-review-guard"
+                style="display:inline-block; padding:0.85rem 2rem; font-size:1rem; border-radius:0.5rem; font-weight:600; text-decoration:none; border:none; cursor:pointer; transition:all 0.3s; background:linear-gradient(135deg,#f59e0b,#d97706); color:white; box-shadow:0 4px 15px rgba(245,158,11,0.35);">
+            <i class="fas fa-star me-2"></i>Write Your Review
+        </button>
+    </div>
+</section>
+
+<!-- WRITE REVIEW MODAL -->
+<div class="modal fade" id="writeReviewModal" tabindex="-1" aria-labelledby="writeReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header review-modal-header">
+                <h5 class="modal-title text-white fw-bold" id="writeReviewModalLabel">
+                    <i class="fas fa-star me-2"></i>Write a Review
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="reviewForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                    <!-- Star Rating -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Your Rating <span class="text-danger">*</span></label>
+                        <div class="star-input" id="starInput">
+                            <input type="radio" name="rating" id="s5" value="5"><label for="s5" title="5 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="s4" value="4"><label for="s4" title="4 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="s3" value="3"><label for="s3" title="3 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="s2" value="2"><label for="s2" title="2 stars"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="s1" value="1"><label for="s1" title="1 star"><i class="fas fa-star"></i></label>
+                        </div>
+                        <div id="ratingError" class="text-danger small mt-1 d-none">Please select a rating.</div>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label for="reviewName" class="form-label fw-semibold">Your Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="reviewName" name="name" placeholder="e.g. Rahul Sharma" required maxlength="60">
+                    </div>
+
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="reviewTitle" class="form-label fw-semibold">Review Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="reviewTitle" name="title" placeholder="e.g. Best note-taking app I've used" required maxlength="100">
+                    </div>
+
+                    <!-- Body -->
+                    <div class="mb-3">
+                        <label for="reviewBody" class="form-label fw-semibold">Your Review <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reviewBody" name="body" rows="4"
+                                  placeholder="Tell others what you liked, what could be improved, and how you use NoteSaver Pro..." required minlength="30" maxlength="800"></textarea>
+                        <div class="form-text text-end" id="charCount">0 / 800</div>
+                    </div>
+
+                    <!-- Plan -->
+                    <div class="mb-3">
+                        <label for="reviewPlan" class="form-label fw-semibold">Which plan are you on?</label>
+                        <select class="form-select" id="reviewPlan" name="plan">
+                            <option value="">Select plan (optional)</option>
+                            <option value="free">Free Plan</option>
+                            <option value="premium">Premium Plan</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn text-white fw-semibold px-4"
+                        id="submitReviewBtn"
+                        style="background:linear-gradient(135deg,var(--primary),var(--secondary)); border:none; border-radius:0.5rem;">
+                    <i class="fas fa-paper-plane me-2"></i>Submit Review
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ── Jinja se login status aur login URL pass karo ── */
+const IS_LOGGED_IN = {{ 'true' if current_user.is_authenticated else 'false' }};
+const LOGIN_URL    = "{{ url_for('login') }}";
+const REVIEWS_URL  = "{{ request.path }}";
+
+/* ─────────────────────────────────────────────────────
+   LOGIN-REQUIRED TOAST
+───────────────────────────────────────────────────── */
+function showLoginRequired() {
+    // Purana toast remove karo agar ho
+    document.getElementById('loginRequiredToast')?.remove();
+
+    const toast = document.createElement('div');
+    toast.id        = 'loginRequiredToast';
+    toast.className = 'login-required-toast';
+    toast.innerHTML = `
+        <i class="fas fa-lock"></i>
+        <span class="toast-msg">
+            Review likhne ke liye pehle
+            <a href="${LOGIN_URL}?next=${encodeURIComponent(REVIEWS_URL)}">login karo</a>!
+        </span>
+        <button class="toast-close" onclick="this.parentElement.remove()" title="Close">
+            <i class="fas fa-times"></i>
+        </button>`;
+    document.body.appendChild(toast);
+
+    // 5 second baad auto-hide
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 5000);
+}
+
+/* ─────────────────────────────────────────────────────
+   DELETE REVIEW
+───────────────────────────────────────────────────── */
+async function deleteReview(btn, reviewId) {
+    if (!confirm('Kya aap sach mein apna review delete karna chahte hain?')) return;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res  = await fetch(`/api/reviews/${reviewId}/delete`, {
+            method:  'DELETE',
+            headers: { 'X-CSRFToken': csrfToken }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            // Card ko smooth remove karo
+            const card = btn.closest('.review-card');
+            card.style.transition = 'opacity 0.4s, transform 0.4s';
+            card.style.opacity    = '0';
+            card.style.transform  = 'scale(0.93)';
+            setTimeout(() => {
+                card.remove();
+                if (typeof showToast === 'function')
+                    showToast('Aapka review delete ho gaya ✓', 'success');
+                // Count update
+                const countEl = document.querySelector('.reviews-inner .text-center.mt-4');
+                if (countEl) {
+                    const remaining = document.querySelectorAll('.review-card').length;
+                    countEl.textContent = `${remaining} review${remaining !== 1 ? 's' : ''} dikh rahe hain`;
+                }
+            }, 400);
+        } else {
+            if (typeof showToast === 'function')
+                showToast(data.error || 'Delete nahi hua, dobara try karo', 'danger');
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete';
+        }
+    } catch(e) {
+        if (typeof showToast === 'function')
+            showToast('Network error — dobara try karo', 'danger');
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    /* ── Write Review buttons — login guard ── */
+    document.querySelectorAll('.btn-write-review-guard').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (!IS_LOGGED_IN) {
+                showLoginRequired();
+            } else {
+                // Logged in hai → modal kholo
+                const modal = new bootstrap.Modal(document.getElementById('writeReviewModal'));
+                modal.show();
+            }
+        });
+    });
+
+    /* ── Helpful button — real API ── */
+    document.querySelectorAll('.review-helpful').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            if (this.dataset.voted) return;
+            const id = this.dataset.id;
+            if (!id) return;
+            try {
+                const res  = await fetch(`/api/reviews/${id}/helpful`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.innerHTML = `<i class="fas fa-thumbs-up"></i> Helpful (${data.helpful})`;
+                    this.style.color = 'var(--primary)';
+                    this.dataset.voted = '1';
+                }
+            } catch(e) { console.error(e); }
+        });
+    });
+
+    /* ── Char counter ── */
+    const bodyEl    = document.getElementById('reviewBody');
+    const charCount = document.getElementById('charCount');
+    if (bodyEl) {
+        bodyEl.addEventListener('input', () => {
+            charCount.textContent = `${bodyEl.value.length} / 800`;
+        });
+    }
+
+    /* ── Submit review — real API ── */
+    document.getElementById('submitReviewBtn').addEventListener('click', async function () {
+        const ratingEl    = document.querySelector('input[name="rating"]:checked');
+        const name        = document.getElementById('reviewName').value.trim();
+        const title       = document.getElementById('reviewTitle').value.trim();
+        const body        = document.getElementById('reviewBody').value.trim();
+        const plan        = document.getElementById('reviewPlan').value;
+        const ratingError = document.getElementById('ratingError');
+
+        ratingError.classList.add('d-none');
+        if (!ratingEl) { ratingError.classList.remove('d-none'); return; }
+        if (!name || !title || body.length < 30) {
+            document.getElementById('reviewForm').reportValidity();
+            return;
+        }
+
+        this.disabled  = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+
+        try {
+            const res  = await fetch('/api/reviews/submit', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body:    JSON.stringify({ name, title, body, rating: parseInt(ratingEl.value), plan })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('writeReviewModal')).hide();
+                if (typeof showToast === 'function') showToast('Shukriya! Aapka review submit ho gaya 🎉', 'success');
+                document.getElementById('reviewForm').reset();
+                if (charCount) charCount.textContent = '0 / 800';
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                if (typeof showToast === 'function') showToast(data.error || 'Kuch galat hua', 'danger');
+            }
+        } catch(e) {
+            if (typeof showToast === 'function') showToast('Network error — dobara try karo', 'danger');
+        } finally {
+            this.disabled  = false;
+            this.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Review';
+        }
+    });
+});
+</script>
+{% endblock %}

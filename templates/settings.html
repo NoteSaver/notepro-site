@@ -1,0 +1,808 @@
+{% extends "base.html" %}
+{% block title %}Settings — NoteSaver Pro{% endblock %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='settings.css') }}">
+<style>
+/* ═══════════════════════════════════════════════
+   SETTINGS PAGE — GLASSMORPHISM LIGHT THEME
+═══════════════════════════════════════════════ */
+
+:root {
+  --st-primary:   #2563eb;
+  --st-secondary: #1e40af;
+  --st-accent:    #f59e0b;
+  --st-success:   #10b981;
+  --st-danger:    #ef4444;
+  --st-purple:    #7c3aed;
+  --st-glass:     rgba(255,255,255,.72);
+  --st-border:    rgba(37,99,235,.1);
+  --st-shadow:    0 8px 32px rgba(37,99,235,.10);
+  --st-shadow-xl: 0 20px 60px rgba(37,99,235,.15);
+  --st-text:      #0f172a;
+  --st-muted:     #64748b;
+  --st-radius:    18px;
+  --st-radius-sm: 10px;
+}
+
+/* ── Page wrapper ── */
+.st-wrapper {
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg,#eff6ff 0%,#f0fdf4 50%,#fef9c3 100%);
+  padding: 2.5rem 0 4rem;
+}
+
+/* ── Breadcrumb ── */
+.st-breadcrumb {
+  display: flex; align-items: center; gap: .5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem; color: var(--st-muted);
+  text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 2rem;
+}
+.st-breadcrumb a { color: var(--st-primary); text-decoration: none; }
+.st-breadcrumb a:hover { text-decoration: underline; }
+
+/* ── Hero banner ── */
+.st-hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+  border-radius: var(--st-radius);
+  padding: 2.5rem 2.5rem 5rem;
+  position: relative; overflow: hidden;
+  margin-bottom: -3.5rem;
+  box-shadow: var(--st-shadow-xl);
+}
+.st-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 80% 50%, rgba(124,58,237,.25) 0%, transparent 60%);
+}
+.st-hero-inner { position: relative; z-index: 1; }
+.st-hero h1 {
+  font-size: 1.75rem; font-weight: 800; color: #fff;
+  margin: 0 0 .35rem; font-family: 'Poppins', sans-serif;
+}
+.st-hero p { color: rgba(255,255,255,.65); margin: 0; font-size: .9rem; }
+
+/* ── Sidebar ── */
+.st-sidebar {
+  background: var(--st-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius);
+  box-shadow: var(--st-shadow);
+  overflow: hidden;
+}
+.st-sidebar-label {
+  padding: 1rem 1.25rem .5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem; text-transform: uppercase;
+  letter-spacing: .15em; color: var(--st-muted);
+  border-bottom: 1px solid var(--st-border);
+}
+.st-nav-link {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .85rem 1.25rem;
+  color: var(--st-muted);
+  text-decoration: none; font-weight: 500; font-size: .875rem;
+  border-left: 3px solid transparent;
+  transition: all .2s;
+}
+.st-nav-link:hover {
+  background: rgba(37,99,235,.05); color: var(--st-primary);
+  border-left-color: rgba(37,99,235,.3);
+}
+.st-nav-link.active {
+  background: rgba(37,99,235,.08); color: var(--st-primary);
+  border-left-color: var(--st-primary); font-weight: 700;
+}
+.st-nav-link i { width: 18px; text-align: center; font-size: 1rem; }
+.st-nav-link.upgrade { color: var(--st-accent); }
+.st-nav-link.upgrade:hover { background: rgba(245,158,11,.08); border-left-color: var(--st-accent); }
+
+/* ── Pill tabs ── */
+.st-tabs {
+  display: flex; gap: .5rem; margin-bottom: 1.5rem;
+  background: rgba(255,255,255,.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--st-border);
+  border-radius: 50px; padding: .35rem;
+}
+.st-tab-btn {
+  flex: 1; border: none; background: transparent;
+  border-radius: 50px; padding: .6rem 1.2rem;
+  font-size: .83rem; font-weight: 600; color: var(--st-muted);
+  cursor: pointer; transition: all .25s;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+}
+.st-tab-btn.active {
+  background: var(--st-primary); color: #fff;
+  box-shadow: 0 4px 15px rgba(37,99,235,.3);
+}
+.st-tab-btn:hover:not(.active) { background: rgba(37,99,235,.08); color: var(--st-primary); }
+
+/* ── Section card ── */
+.st-card {
+  background: var(--st-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--st-border);
+  border-radius: var(--st-radius);
+  box-shadow: var(--st-shadow);
+  overflow: hidden; margin-bottom: 1.5rem;
+  animation: stCardIn .4s ease both;
+}
+@keyframes stCardIn {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.st-card:nth-child(2) { animation-delay: .08s; }
+.st-card:nth-child(3) { animation-delay: .16s; }
+
+.st-card-header {
+  padding: 1.4rem 1.75rem;
+  border-bottom: 1px solid var(--st-border);
+}
+.st-card-header h4 {
+  margin: 0 0 .2rem; font-size: 1rem; font-weight: 700;
+  color: var(--st-text); font-family: 'Poppins', sans-serif;
+  display: flex; align-items: center; gap: .6rem;
+}
+.st-card-header h4 i { width: 28px; height: 28px; border-radius: 8px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size: .8rem; color: #fff; }
+.st-card-header p {
+  margin: 0; font-size: .8rem; color: var(--st-muted);
+  font-family: 'DM Mono', monospace;
+}
+.st-card-body { padding: 1.75rem; }
+
+/* icon colors per card type */
+.icon-blue  { background: var(--st-primary); }
+.icon-green { background: var(--st-success); }
+.icon-amber { background: var(--st-accent); }
+.icon-red   { background: var(--st-danger); }
+.icon-slate { background: #475569; }
+
+/* ── Form inputs ── */
+.st-label {
+  font-size: .73rem; font-weight: 600; color: var(--st-text);
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: .45rem; display: block;
+}
+.st-input-group {
+  display: flex; align-items: stretch;
+  border: 1.5px solid rgba(37,99,235,.15); border-radius: var(--st-radius-sm);
+  overflow: hidden; background: rgba(255,255,255,.85);
+  transition: border-color .2s, box-shadow .2s;
+}
+.st-input-group:focus-within {
+  border-color: var(--st-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  background: #fff;
+}
+.st-input-icon {
+  padding: 0 .9rem;
+  display: flex; align-items: center;
+  color: var(--st-muted); background: rgba(241,245,249,.7);
+  border-right: 1px solid rgba(37,99,235,.1);
+  font-size: .85rem;
+}
+.st-input {
+  flex: 1; border: none; background: transparent;
+  color: var(--st-text); font-size: .875rem;
+  padding: .75rem .85rem; outline: none;
+  font-family: 'Inter', sans-serif;
+}
+.st-input::placeholder { color: var(--st-muted); }
+.st-toggle-btn {
+  background: transparent; border: none;
+  color: var(--st-muted); padding: 0 .9rem; cursor: pointer;
+  border-left: 1px solid rgba(37,99,235,.1);
+  transition: color .2s;
+}
+.st-toggle-btn:hover { color: var(--st-primary); }
+
+/* ── Password strength ── */
+.st-strength-bar {
+  height: 4px; border-radius: 2px;
+  background: rgba(37,99,235,.1); margin: .6rem 0 .35rem;
+  overflow: hidden;
+}
+.st-strength-fill {
+  height: 100%; border-radius: 2px;
+  transition: width .4s, background .4s;
+  width: 0;
+}
+.st-strength-text {
+  font-size: .72rem; font-family: 'DM Mono', monospace; color: var(--st-muted);
+  display: flex; align-items: center; gap: .35rem;
+}
+
+/* ── Sessions table ── */
+.st-table { width: 100%; border-collapse: collapse; }
+.st-table th {
+  padding: .75rem 1rem; text-align: left;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--st-muted); font-family: 'DM Mono', monospace;
+  border-bottom: 1.5px solid var(--st-border);
+  font-weight: 600;
+}
+.st-table td {
+  padding: .9rem 1rem; font-size: .85rem; color: var(--st-text);
+  border-bottom: 1px solid rgba(37,99,235,.06);
+  vertical-align: middle;
+}
+.st-table tr:last-child td { border-bottom: none; }
+.st-table tr:hover td { background: rgba(37,99,235,.025); }
+.st-badge-online {
+  background: rgba(16,185,129,.12); color: #065f46;
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: 50px; font-size: .7rem; font-weight: 700;
+  padding: .2rem .65rem; font-family: 'DM Mono', monospace;
+}
+.st-badge-current {
+  background: rgba(37,99,235,.1); color: var(--st-primary);
+  border: 1px solid rgba(37,99,235,.2);
+  border-radius: 50px; font-size: .7rem; font-weight: 700;
+  padding: .2rem .65rem; font-family: 'DM Mono', monospace;
+}
+.st-logout-btn {
+  background: rgba(239,68,68,.08); border: 1.5px solid rgba(239,68,68,.2);
+  color: var(--st-danger); border-radius: 50px;
+  font-size: .72rem; font-weight: 600; padding: .3rem .85rem;
+  cursor: pointer; transition: all .2s;
+}
+.st-logout-btn:hover {
+  background: var(--st-danger); color: #fff;
+}
+
+/* ── Export card ── */
+.st-export-list {
+  list-style: none; padding: 0; margin: 0 0 1.5rem;
+}
+.st-export-list li {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .875rem; color: var(--st-text);
+  padding: .45rem 0; border-bottom: 1px solid rgba(37,99,235,.06);
+}
+.st-export-list li:last-child { border-bottom: none; }
+.st-export-list li i { color: var(--st-success); width: 16px; }
+.btn-export {
+  display: inline-flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: .35rem; background: linear-gradient(135deg,#10b981,#059669);
+  color: #fff; border: none; border-radius: 16px;
+  padding: 1.2rem 2rem; font-family: 'Poppins', sans-serif;
+  font-weight: 700; font-size: .9rem; text-decoration: none;
+  box-shadow: 0 8px 25px rgba(16,185,129,.3);
+  transition: all .25s; min-width: 140px;
+}
+.btn-export:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(16,185,129,.4);
+  color: #fff;
+}
+.btn-export i { font-size: 1.6rem; }
+
+/* ── Danger zone card ── */
+.st-danger-card {
+  background: rgba(239,68,68,.04);
+  border: 1.5px dashed rgba(239,68,68,.25);
+  border-radius: var(--st-radius);
+  padding: 1.5rem 1.75rem;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.st-danger-title {
+  font-weight: 700; color: var(--st-danger);
+  font-family: 'Poppins', sans-serif; font-size: .95rem; margin-bottom: .25rem;
+}
+.st-danger-text { font-size: .83rem; color: var(--st-muted); margin: 0; }
+
+/* ── Buttons ── */
+.btn-st-primary {
+  background: linear-gradient(135deg, var(--st-primary), var(--st-purple));
+  color: #fff; border: none; border-radius: 50px;
+  padding: .65rem 1.8rem; font-weight: 700; font-size: .85rem;
+  transition: all .25s; box-shadow: 0 4px 15px rgba(37,99,235,.25);
+}
+.btn-st-primary:hover:not(:disabled) {
+  transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37,99,235,.4);
+}
+.btn-st-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+.btn-st-danger {
+  background: var(--st-danger); color: #fff; border: none;
+  border-radius: 50px; padding: .65rem 1.5rem;
+  font-weight: 700; font-size: .83rem;
+  box-shadow: 0 4px 15px rgba(239,68,68,.25);
+  transition: all .25s;
+}
+.btn-st-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(239,68,68,.4); }
+.btn-st-outline-danger {
+  background: transparent; border: 1.5px solid var(--st-danger);
+  color: var(--st-danger); border-radius: 50px;
+  padding: .6rem 1.4rem; font-weight: 600; font-size: .83rem;
+  transition: all .2s;
+}
+.btn-st-outline-danger:hover:not(:disabled) {
+  background: var(--st-danger); color: #fff;
+}
+.btn-st-outline-danger:disabled { opacity: .45; cursor: not-allowed; }
+.btn-st-secondary {
+  background: rgba(100,116,139,.1); border: 1.5px solid rgba(100,116,139,.2);
+  color: var(--st-muted); border-radius: 50px;
+  padding: .6rem 1.4rem; font-weight: 600; font-size: .83rem;
+  transition: all .2s;
+}
+.btn-st-secondary:hover { background: rgba(100,116,139,.18); }
+
+/* ── Card footer bar ── */
+.st-card-footer {
+  padding: 1rem 1.75rem;
+  border-top: 1px solid var(--st-border);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; background: rgba(241,245,249,.4);
+}
+.st-card-footer-hint {
+  font-size: .72rem; color: var(--st-muted);
+  font-family: 'DM Mono', monospace;
+  display: flex; align-items: center; gap: .4rem;
+}
+.st-card-footer-hint i { color: var(--st-accent); }
+
+/* ── Match / mismatch ── */
+.st-pw-match   { font-size:.72rem; font-family:'DM Mono',monospace; color:var(--st-success); display:none; gap:.3rem; align-items:center; }
+.st-pw-nomatch { font-size:.72rem; font-family:'DM Mono',monospace; color:var(--st-danger);  display:none; gap:.3rem; align-items:center; }
+
+/* ── Modal ── */
+.st-modal .modal-content {
+  border: none; border-radius: var(--st-radius);
+  box-shadow: 0 30px 80px rgba(0,0,0,.18);
+}
+.st-modal .modal-header {
+  background: linear-gradient(135deg,#ef4444,#dc2626);
+  border-radius: var(--st-radius) var(--st-radius) 0 0;
+  padding: 1.25rem 1.75rem;
+}
+.st-modal .modal-title { color: #fff; font-weight: 700; font-family:'Poppins',sans-serif; }
+.st-modal .modal-body { padding: 1.75rem; background: #fff; }
+.st-modal .modal-footer {
+  padding: 1rem 1.75rem; border-top: 1px solid rgba(0,0,0,.06);
+  background: #fff; border-radius: 0 0 var(--st-radius) var(--st-radius);
+}
+
+/* ── Toast ── */
+.st-toast-wrap { position: fixed; top: 80px; right: 1.5rem; z-index: 1100; }
+.st-toast {
+  min-width: 300px; border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  margin-bottom: .5rem;
+}
+.st-toast-body {
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem 1.25rem; font-weight: 600; font-size: .875rem;
+}
+.st-toast-success { background: #f0fdf4; border: 1px solid rgba(16,185,129,.25); color: #065f46; }
+.st-toast-error   { background: #fef2f2; border: 1px solid rgba(239,68,68,.25); color: #991b1b; }
+.st-toast-success i { color: var(--st-success); }
+.st-toast-error   i { color: var(--st-danger); }
+.st-toast .btn-close { margin-left: auto; opacity: .6; }
+
+/* ── Code box ── */
+.st-code-box {
+  background: #fef2f2; border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px; padding: .75rem 1rem; margin: 1rem 0;
+}
+.st-code-box code { color: var(--st-danger); font-family: 'DM Mono',monospace; font-weight: 600; }
+.st-plain-input {
+  background: rgba(255,255,255,.85);
+  border: 1.5px solid rgba(37,99,235,.15);
+  border-radius: var(--st-radius-sm);
+  color: var(--st-text); font-size: .875rem;
+  padding: .7rem 1rem; width: 100%; outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.st-plain-input:focus {
+  border-color: var(--st-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+  .st-hero { padding: 2rem 1.5rem 4.5rem; }
+  .st-card-body { padding: 1.25rem; }
+  .st-danger-card { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 576px) {
+  .st-tabs { flex-direction: column; border-radius: var(--st-radius-sm); }
+  .st-tab-btn { border-radius: var(--st-radius-sm); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="st-wrapper">
+<div class="container-fluid px-3 px-lg-5">
+
+  <!-- Breadcrumb -->
+  <nav class="st-breadcrumb">
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-home me-1"></i>Dashboard</a>
+    <span>/</span>
+    <span style="color:var(--st-primary); font-weight:600;">Settings</span>
+  </nav>
+
+  <div class="row g-4">
+
+    <!-- ─────────── Sidebar ─────────── -->
+    <div class="col-lg-3">
+      <div class="st-sidebar sticky-top" style="top:90px;">
+        <div class="st-sidebar-label">Menu</div>
+        <a href="{{ url_for('dashboard') }}" class="st-nav-link">
+          <i class="fas fa-tachometer-alt"></i>Dashboard
+        </a>
+        <a href="{{ url_for('profile') }}" class="st-nav-link">
+          <i class="fas fa-user-circle"></i>My Profile
+        </a>
+        <a href="{{ url_for('settings') }}" class="st-nav-link active">
+          <i class="fas fa-cog"></i>Settings
+        </a>
+        {% if not current_user.is_premium_active() %}
+        <a href="{{ url_for('premium') }}" class="st-nav-link upgrade">
+          <i class="fas fa-crown"></i>Upgrade Pro
+        </a>
+        {% endif %}
+
+        <!-- Security info box -->
+        <div style="margin:1rem; padding:1rem; background:linear-gradient(135deg,rgba(37,99,235,.06),rgba(124,58,237,.06)); border-radius:12px; border:1px solid rgba(37,99,235,.1);">
+          <div style="font-size:.7rem; font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--st-muted); margin-bottom:.6rem;">Security Status</div>
+          <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem;">
+            <i class="fas fa-shield-alt" style="color:var(--st-success); font-size:.8rem;"></i>
+            <span style="font-size:.78rem; color:var(--st-text); font-weight:600;">Session Active</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:.5rem;">
+            <i class="fas fa-lock" style="color:var(--st-primary); font-size:.8rem;"></i>
+            <span style="font-size:.78rem; color:var(--st-text); font-weight:600;">CSRF Protected</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────── Main ─────────── -->
+    <div class="col-lg-9">
+
+      <!-- Hero -->
+      <div class="st-hero">
+        <div class="st-hero-inner">
+          <h1><i class="fas fa-sliders-h me-2" style="opacity:.9;"></i>Settings</h1>
+          <p>Manage your security, sessions, and data — all in one place.</p>
+        </div>
+      </div>
+
+      <!-- Content shifted down from hero overlap -->
+      <div style="padding-top:4.5rem;">
+
+        <!-- Tab bar -->
+        <div class="st-tabs" id="settingsTabs" role="tablist">
+          <button class="st-tab-btn active" data-tab="security" role="tab">
+            <i class="fas fa-shield-alt"></i>Security
+          </button>
+          <button class="st-tab-btn" data-tab="data" role="tab">
+            <i class="fas fa-database"></i>Data &amp; Export
+          </button>
+        </div>
+
+        <!-- ══ SECURITY TAB ══ -->
+        <div id="tab-security" class="st-tab-pane">
+
+          <!-- Change Password -->
+          <div class="st-card">
+            <div class="st-card-header">
+              <h4>
+                <i class="fas fa-key icon-blue"></i>
+                Change Password
+              </h4>
+              <p>Update your login password to keep your account secure</p>
+            </div>
+            <div class="st-card-body">
+              <form id="changePasswordForm">
+                <div class="row g-4">
+
+                  <div class="col-12">
+                    <label for="currentPassword" class="st-label">Current Password</label>
+                    <div class="st-input-group">
+                      <span class="st-input-icon"><i class="fas fa-lock"></i></span>
+                      <input type="password" class="st-input" id="currentPassword"
+                             placeholder="Your current password" required>
+                      <button type="button" class="st-toggle-btn" id="toggleCurrentPassword">
+                        <i class="fas fa-eye-slash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="newPassword" class="st-label">New Password</label>
+                    <div class="st-input-group">
+                      <span class="st-input-icon"><i class="fas fa-key"></i></span>
+                      <input type="password" class="st-input" id="newPassword"
+                             placeholder="Create new password" required>
+                      <button type="button" class="st-toggle-btn" id="toggleNewPassword">
+                        <i class="fas fa-eye-slash"></i>
+                      </button>
+                    </div>
+                    <div class="st-strength-bar">
+                      <div class="st-strength-fill" id="newPasswordStrength"></div>
+                    </div>
+                    <p class="st-strength-text">
+                      <i class="fas fa-circle" style="font-size:.5rem; color:var(--st-accent);"></i>
+                      <span id="strengthText">Enter a password</span>
+                    </p>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="confirmNewPassword" class="st-label">Confirm New Password</label>
+                    <div class="st-input-group">
+                      <span class="st-input-icon"><i class="fas fa-check-circle"></i></span>
+                      <input type="password" class="st-input" id="confirmNewPassword"
+                             placeholder="Confirm password" required>
+                      <button type="button" class="st-toggle-btn" id="toggleConfirmNewPassword">
+                        <i class="fas fa-eye-slash"></i>
+                      </button>
+                    </div>
+                    <div style="margin-top:.5rem;">
+                      <span id="passwordMatch"   class="st-pw-match">  <i class="fas fa-check-circle"></i>Passwords match</span>
+                      <span id="passwordMismatch" class="st-pw-nomatch"><i class="fas fa-times-circle"></i>Passwords do not match</span>
+                    </div>
+                  </div>
+
+                </div>
+              </form>
+            </div>
+            <div class="st-card-footer">
+              <p class="st-card-footer-hint">
+                <i class="fas fa-shield-alt"></i>Use a strong, unique password — min 8 characters
+              </p>
+              <button type="submit" form="changePasswordForm" class="btn-st-primary" id="changePasswordBtn" disabled>
+                <span class="spinner-border spinner-border-sm d-none me-1"></span>
+                <i class="fas fa-save me-1"></i>Update Password
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Sessions -->
+          <div class="st-card">
+            <div class="st-card-header">
+              <h4>
+                <i class="fas fa-desktop icon-slate"></i>
+                Active Sessions
+              </h4>
+              <p>Devices where you're currently logged in</p>
+            </div>
+            <div class="st-card-body" style="padding:0; overflow-x:auto;">
+              <table class="st-table">
+                <thead>
+                  <tr>
+                    <th><i class="fas fa-laptop me-1"></i>Device</th>
+                    <th><i class="fas fa-map-marker-alt me-1"></i>Location</th>
+                    <th><i class="fas fa-clock me-1"></i>Last Active</th>
+                    <th><i class="fas fa-circle me-1"></i>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="sessionsTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align:center; padding:2.5rem; color:var(--st-muted); font-family:'DM Mono',monospace; font-size:.8rem;">
+                      <span class="spinner-border spinner-border-sm me-2" style="color:var(--st-primary);"></span>
+                      Loading sessions…
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="st-card-footer">
+              <p class="st-card-footer-hint">
+                <i class="fas fa-info-circle"></i>Log out devices you don't recognise immediately
+              </p>
+              <button class="btn-st-outline-danger" id="logoutAllOtherSessionsBtn" disabled>
+                <i class="fas fa-sign-out-alt me-1"></i>Logout All Sessions
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /tab-security -->
+
+
+        <!-- ══ DATA TAB ══ -->
+        <div id="tab-data" class="st-tab-pane" style="display:none;">
+
+          <!-- Export -->
+          <div class="st-card">
+            <div class="st-card-header">
+              <h4>
+                <i class="fas fa-cloud-download-alt icon-green"></i>
+                Export My Data
+              </h4>
+              <p>Download all your notes as a JSON backup</p>
+            </div>
+            <div class="st-card-body">
+              <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                  <h5 style="font-family:'Poppins',sans-serif; font-weight:700; color:var(--st-text); font-size:.95rem; margin-bottom:1rem;">
+                    <i class="fas fa-file-alt me-2" style="color:var(--st-success);"></i>What's included
+                  </h5>
+                  <ul class="st-export-list">
+                    <li><i class="fas fa-check-circle"></i>All note titles &amp; content</li>
+                    <li><i class="fas fa-check-circle"></i>Creation &amp; modification dates</li>
+                    <li><i class="fas fa-check-circle"></i>Categories and tags</li>
+                    <li><i class="fas fa-check-circle"></i>Exported in JSON format</li>
+                  </ul>
+                </div>
+                <div class="col-md-4 text-center">
+                  <a href="{{ url_for('export_data') }}" class="btn-export" id="exportDataBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Start Export</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger — Delete All Notes -->
+          <div class="st-danger-card">
+            <div>
+              <p class="st-danger-title"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</p>
+              <p class="st-danger-text">Permanently delete all your notes. This action <strong>cannot</strong> be undone.</p>
+            </div>
+            <button type="button" class="btn-st-danger"
+                    data-bs-toggle="modal" data-bs-target="#deleteAllNotesModal">
+              <i class="fas fa-trash-alt me-1"></i>Delete All Notes
+            </button>
+          </div>
+
+        </div><!-- /tab-data -->
+
+      </div><!-- /padding-top -->
+    </div><!-- /col-lg-9 -->
+  </div><!-- /row -->
+</div><!-- /container -->
+</div><!-- /st-wrapper -->
+
+
+<!-- ══════════════ Delete All Notes Modal ══════════════ -->
+<div class="modal fade st-modal" id="deleteAllNotesModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Bulk Deletion</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div style="background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.2); border-radius:10px; padding:1rem; margin-bottom:1.25rem; display:flex; gap:.75rem;">
+          <i class="fas fa-exclamation-circle fa-2x mt-1" style="color:var(--st-danger);"></i>
+          <div>
+            <p style="font-weight:700; color:var(--st-danger); margin-bottom:.3rem; font-size:.9rem;">Critical Warning</p>
+            <p style="color:var(--st-muted); margin:0; font-size:.83rem;">All your notes will be <strong style="color:var(--st-text);">permanently deleted</strong> from the system.</p>
+          </div>
+        </div>
+        <p style="font-size:.85rem; color:var(--st-text); margin-bottom:.75rem;">To continue, type the phrase exactly:</p>
+        <div class="st-code-box"><code>DELETE ALL NOTES</code></div>
+        <label class="st-label">Confirmation Phrase</label>
+        <input type="text" class="st-plain-input" id="deleteAllNotesConfirmInput"
+               placeholder="Type: DELETE ALL NOTES">
+      </div>
+      <div class="modal-footer" style="gap:.75rem;">
+        <button class="btn-st-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i>Cancel
+        </button>
+        <button class="btn-st-danger" id="confirmDeleteAllNotes" disabled>
+          <span class="spinner-border spinner-border-sm d-none me-1"></span>
+          <i class="fas fa-trash-alt me-1"></i>Delete All Notes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ Toasts ══════════════ -->
+<div class="st-toast-wrap">
+  <div class="toast st-toast st-toast-success" id="successToast" role="alert">
+    <div class="st-toast-body">
+      <i class="fas fa-check-circle fa-lg"></i>
+      <span id="successMessage"></span>
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  <div class="toast st-toast st-toast-error" id="errorToast" role="alert">
+    <div class="st-toast-body">
+      <i class="fas fa-exclamation-circle fa-lg"></i>
+      <span id="errorMessage"></span>
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='settings.js') }}"></script>
+<script>
+/* ═══ Tab switching ═══ */
+document.querySelectorAll('.st-tab-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.st-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.st-tab-pane').forEach(p => p.style.display = 'none');
+    this.classList.add('active');
+    document.getElementById('tab-' + this.dataset.tab).style.display = 'block';
+  });
+});
+
+/* ═══ Sessions ═══ */
+document.addEventListener('DOMContentLoaded', function () {
+
+  function renderSessions(data) {
+    const tbody = document.getElementById('sessionsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--st-muted);font-family:'DM Mono',monospace;font-size:.8rem;">No active sessions found</td></tr>`;
+      return;
+    }
+
+    const logoutAllBtn = document.getElementById('logoutAllOtherSessionsBtn');
+    const hasOthers = data.some(s => !s.is_current);
+    if (logoutAllBtn) logoutAllBtn.disabled = !hasOthers;
+
+    data.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${s.device || '—'}</td>
+        <td style="color:var(--st-muted);font-size:.8rem;">${s.location || '—'}</td>
+        <td style="color:var(--st-muted);font-size:.8rem;font-family:'DM Mono',monospace;">${s.last_activity || '—'}</td>
+        <td>${s.is_current
+          ? '<span class="st-badge-current"><i class="fas fa-circle me-1" style="font-size:.45rem;"></i>Current</span>'
+          : '<span class="st-badge-online"><i class="fas fa-circle me-1" style="font-size:.45rem;"></i>Active</span>'
+        }</td>
+        <td>${s.is_current
+          ? '<span style="font-size:.72rem;color:var(--st-muted);font-family:DM Mono,monospace;">This device</span>'
+          : `<button class="st-logout-btn" onclick="window.logoutSession('${s.token || ''}')"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>`
+        }</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function refreshSessions() {
+    fetch('/api/sessions?ts=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.json())
+      .then(renderSessions)
+      .catch(() => {
+        const tbody = document.getElementById('sessionsTableBody');
+        if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--st-muted);font-size:.8rem;">Could not load sessions</td></tr>`;
+      });
+  }
+
+  refreshSessions();
+  window.loadActiveSessions = refreshSessions;
+
+  /* Location */
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        fetch('/api/update-location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ lat: pos.coords.latitude, lon: pos.coords.longitude })
+        }).then(() => setTimeout(refreshSessions, 1500));
+      },
+      () => console.log('Location denied')
+    );
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- templates/404.html -->
+{% extends "base.html" %}
+
+{% block title %}पेज नहीं मिला (404){% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h1>404 - पेज नहीं मिला</h1>
+    <p>माफ़ करें, जिस पेज को आप खोज रहे हैं वो मौजूद नहीं है।</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">होम पर जाएं</a>
+</div>
+{% endblock %}

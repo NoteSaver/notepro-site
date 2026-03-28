@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}Support — NoteSaver Pro{% endblock %}
+
+{% block head %}
+<style>
+.sp-wrap { max-width: 600px; margin: 2rem auto; padding: 0 1rem 4rem; }
+
+.sp-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    overflow: hidden;
+}
+.sp-card-top {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    padding: 1.5rem 1.75rem;
+    display: flex; align-items: center; gap: 1rem;
+}
+.sp-card-top .sp-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: #fff; flex-shrink: 0;
+}
+.sp-card-top h5 { color:#fff; margin:0; font-weight:700; font-size:1rem; font-family:'Poppins',sans-serif; }
+.sp-card-top p  { color:rgba(255,255,255,.75); margin:0; font-size:.8rem; }
+
+.sp-body { padding: 1.5rem 1.75rem; }
+
+.sp-field { margin-bottom: 1.1rem; }
+.sp-label {
+    font-size:.75rem; font-weight:700; color:#374151;
+    text-transform:uppercase; letter-spacing:.05em;
+    margin-bottom:.4rem; display:block;
+}
+.sp-label .req { color:#ef4444; }
+.sp-input {
+    width:100%; padding:.65rem .9rem;
+    border:1.5px solid #e5e7eb; border-radius:8px;
+    font-size:.875rem; color:#0f172a; background:#fff;
+    transition:border-color .2s, box-shadow .2s; outline:none;
+    font-family:inherit;
+}
+.sp-input:focus  { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+.sp-input[disabled] { background:#f9fafb; color:#9ca3af; cursor:not-allowed; }
+.sp-input.is-error  { border-color:#ef4444; }
+textarea.sp-input   { resize:vertical; min-height:110px; }
+
+.sp-row { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+@media(max-width:480px){ .sp-row { grid-template-columns:1fr; } }
+
+.sp-char { font-size:.7rem; color:#9ca3af; text-align:right; margin-top:.25rem; font-family:'DM Mono',monospace; }
+.sp-char.warn { color:#f59e0b; }
+.sp-char.over { color:#ef4444; font-weight:700; }
+
+.sp-chips { display:flex; flex-wrap:wrap; gap:.4rem; }
+.sp-chip {
+    padding:.35rem .8rem; border-radius:50px; font-size:.75rem;
+    font-weight:600; cursor:pointer; border:1.5px solid #e5e7eb;
+    color:#6b7280; background:#f9fafb; transition:all .15s; user-select:none;
+}
+.sp-chip:hover { border-color:#2563eb; color:#2563eb; }
+.sp-chip.on    { background:#2563eb; color:#fff; border-color:#2563eb; }
+
+.sp-btn {
+    width:100%; padding:.8rem;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:#fff; border:none; border-radius:8px;
+    font-weight:700; font-size:.9rem; cursor:pointer;
+    transition:opacity .2s, transform .2s;
+    display:flex; align-items:center; justify-content:center; gap:.5rem;
+    font-family:'Poppins',sans-serif;
+}
+.sp-btn:hover:not(:disabled) { opacity:.9; transform:translateY(-1px); }
+.sp-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+.sp-spinner {
+    width:16px; height:16px;
+    border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
+    border-radius:50%; animation:sp-spin .6s linear infinite; display:none;
+}
+@keyframes sp-spin { to { transform:rotate(360deg); } }
+.sp-btn.loading .sp-spinner { display:inline-block; }
+.sp-btn.loading .sp-ico     { display:none; }
+
+.sp-consent {
+    display:flex; align-items:flex-start; gap:.6rem;
+    font-size:.78rem; color:#6b7280; margin-bottom:1.1rem; cursor:pointer;
+}
+.sp-consent input { margin-top:.15rem; accent-color:#2563eb; flex-shrink:0; }
+
+.sp-alert {
+    border-radius:8px; padding:.75rem 1rem;
+    font-size:.85rem; font-weight:600;
+    display:none; align-items:center; gap:.6rem; margin-bottom:1rem;
+}
+.sp-alert.success { background:#f0fdf4; color:#065f46; border:1px solid #bbf7d0; }
+.sp-alert.error   { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+.sp-alert.show    { display:flex; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sp-wrap">
+
+    <nav style="font-size:.75rem; color:#9ca3af; margin-bottom:1.25rem;">
+        <a href="{{ url_for('dashboard') }}" style="color:#2563eb; text-decoration:none;">Dashboard</a>
+        <span style="margin:0 .4rem;">/</span>
+        <span>Support</span>
+    </nav>
+
+    <div class="sp-card">
+        <div class="sp-card-top">
+            <div class="sp-icon"><i class="fas fa-headset"></i></div>
+            <div>
+                <h5>Contact Support</h5>
+                <p>We'll reply to <strong style="color:#fff;">{{ current_user.email }}</strong></p>
+            </div>
+        </div>
+
+        <div class="sp-body">
+            <div id="spAlert" class="sp-alert"></div>
+
+            <form id="supportForm" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+                <div class="sp-row">
+                    <div class="sp-field">
+                        <label class="sp-label">Your Name</label>
+                        <input class="sp-input" type="text" id="sp_name" disabled
+                               value="{% if current_user.first_name %}{{ current_user.first_name }} {{ current_user.last_name or '' }}{% else %}{{ current_user.username }}{% endif %}">
+                    </div>
+                    <div class="sp-field">
+                        <label class="sp-label">Email</label>
+                        <input class="sp-input" type="email" id="sp_email" disabled
+                               value="{{ current_user.email }}">
+                    </div>
+                </div>
+
+                <div class="sp-field">
+                    <label class="sp-label">Category <span class="req">*</span></label>
+                    <input type="hidden" id="sp_category">
+                    <div class="sp-chips">
+                        <div class="sp-chip" data-v="bug"><i class="fas fa-bug me-1"></i>Bug</div>
+                        <div class="sp-chip" data-v="account"><i class="fas fa-user-cog me-1"></i>Account</div>
+                        <div class="sp-chip" data-v="billing"><i class="fas fa-credit-card me-1"></i>Billing</div>
+                        <div class="sp-chip" data-v="feature"><i class="fas fa-lightbulb me-1"></i>Feature Request</div>
+                        <div class="sp-chip" data-v="premium"><i class="fas fa-crown me-1"></i>Premium</div>
+                        <div class="sp-chip" data-v="other"><i class="fas fa-ellipsis-h me-1"></i>Other</div>
+                    </div>
+                    <p id="catErr" style="font-size:.72rem; color:#ef4444; margin-top:.3rem; display:none;">
+                        <i class="fas fa-exclamation-circle me-1"></i>Please select a category
+                    </p>
+                </div>
+
+                <div class="sp-field">
+                    <label class="sp-label" for="sp_subject">Subject <span class="req">*</span></label>
+                    <input class="sp-input" type="text" id="sp_subject" name="subject"
+                           placeholder="Brief summary of your issue" maxlength="100" autocomplete="off">
+                    <div class="sp-char" id="subCount">0 / 100</div>
+                </div>
+
+                <div class="sp-field">
+                    <label class="sp-label" for="sp_message">Message <span class="req">*</span></label>
+                    <textarea class="sp-input" id="sp_message" name="message"
+                              placeholder="Describe your issue in detail..." maxlength="2000"></textarea>
+                    <div class="sp-char" id="msgCount">0 / 2000</div>
+                </div>
+
+                <label class="sp-consent">
+                    <input type="checkbox" id="sp_consent">
+                    I agree that my details may be used by the support team to resolve my issue.
+                </label>
+
+                <button type="submit" class="sp-btn" id="spSubmit" disabled>
+                    <span class="sp-spinner"></span>
+                    <i class="fas fa-paper-plane sp-ico"></i>
+                    Send Email
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    document.querySelectorAll('.sp-chip').forEach(function(c){
+        c.addEventListener('click', function(){
+            document.querySelectorAll('.sp-chip').forEach(function(x){ x.classList.remove('on'); });
+            this.classList.add('on');
+            document.getElementById('sp_category').value = this.dataset.v;
+            document.getElementById('catErr').style.display = 'none';
+            checkReady();
+        });
+    });
+
+    function charCounter(inputId, countId, max){
+        document.getElementById(inputId).addEventListener('input', function(){
+            var n = this.value.length;
+            var el = document.getElementById(countId);
+            el.textContent = n + ' / ' + max;
+            el.className = 'sp-char' + (n >= max ? ' over' : n > max * .85 ? ' warn' : '');
+            checkReady();
+        });
+    }
+    charCounter('sp_subject', 'subCount', 100);
+    charCounter('sp_message', 'msgCount', 2000);
+
+    document.getElementById('sp_consent').addEventListener('change', checkReady);
+
+    function checkReady(){
+        var ok = document.getElementById('sp_category').value &&
+                 document.getElementById('sp_subject').value.trim() &&
+                 document.getElementById('sp_message').value.trim() &&
+                 document.getElementById('sp_consent').checked;
+        document.getElementById('spSubmit').disabled = !ok;
+    }
+
+    function showAlert(type, msg){
+        var el = document.getElementById('spAlert');
+        var ico = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        el.innerHTML = '<i class="fas ' + ico + '"></i>' + msg;
+        el.className = 'sp-alert ' + type + ' show';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function getCSRF(){
+        var m = document.querySelector('meta[name="csrf-token"]');
+        return m ? m.getAttribute('content') : '';
+    }
+
+    document.getElementById('supportForm').addEventListener('submit', function(e){
+        e.preventDefault();
+
+        var cat = document.getElementById('sp_category').value;
+        if(!cat){ document.getElementById('catErr').style.display = 'block'; return; }
+
+        var btn = document.getElementById('spSubmit');
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        var body = new URLSearchParams({
+            name:     document.getElementById('sp_name').value,
+            email:    document.getElementById('sp_email').value,
+            category: cat,
+            subject:  document.getElementById('sp_subject').value.trim(),
+            message:  document.getElementById('sp_message').value.trim()
+        });
+
+        fetch('/api/support/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCSRF(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: body.toString()
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+            if(data.success !== false){
+                showAlert('success', 'Email sent! We\'ll reply to ' + document.getElementById('sp_email').value + ' shortly.');
+                document.getElementById('supportForm').reset();
+                document.querySelectorAll('.sp-chip').forEach(function(x){ x.classList.remove('on'); });
+                document.getElementById('sp_category').value = '';
+                document.getElementById('subCount').textContent = '0 / 100';
+                document.getElementById('msgCount').textContent = '0 / 2000';
+            } else {
+                showAlert('error', data.message || 'Failed to send. Please try again.');
+            }
+        })
+        .catch(function(err){
+            showAlert('error', 'Something went wrong. Please try again.');
+        })
+        .finally(function(){
+            btn.classList.remove('loading');
+            checkReady();
+        });
+    });
+})();
+</script>
+{% endblock %}

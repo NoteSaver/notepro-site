@@ -1,0 +1,436 @@
+/* ========== ENHANCED PAGE NAVIGATION STYLES ========== */
+/* Replaces old .page-navigation styles */
+
+/* ========== GLASSMORPHISM CONTAINER ========== */
+.page-navigation {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Custom Scrollbar Styling */
+.page-navigation::-webkit-scrollbar {
+    width: 5px;
+}
+
+.page-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.page-navigation::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.3);
+    border-radius: 10px;
+}
+
+.page-navigation::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.6);
+}
+
+/* Firefox Scrollbar */
+.page-navigation {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+}
+
+/* ========== PAGE BUTTON STYLING ========== */
+.page-nav-btn {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gradient Overlay Effect on Hover */
+.page-nav-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+/* Hover State */
+.page-nav-btn:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.page-nav-btn:hover::before {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Active/Current Button */
+.page-nav-btn.current {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    transform: scale(1.1);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.page-nav-btn.current:hover {
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+    animation: none;
+}
+
+/* Tooltip on Hover */
+.page-nav-btn::after {
+    content: attr(data-page);
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-8px);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    font-weight: 500;
+}
+
+.page-nav-btn:hover::after {
+    opacity: 1;
+}
+
+/* Active State Indicator */
+.page-nav-btn:active {
+    transform: scale(0.95);
+}
+
+/* Focus State for Accessibility */
+.page-nav-btn:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Disabled State */
+.page-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #94a3b8;
+}
+
+/* ========== PAGE COUNT DISPLAY ========== */
+.page-count-display {
+    text-align: center;
+    padding: 8px 0;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 8px 0;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 6px;
+}
+
+/* ========== JUMP TO TOP BUTTON ========== */
+.page-nav-jump-btn {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-nav-jump-btn:hover {
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+.page-nav-jump-btn:active {
+    transform: translateY(0);
+}
+
+.page-nav-jump-btn:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
+/* Tooltip for Jump Button */
+.page-nav-jump-btn::after {
+    content: 'Jump to Top';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-8px);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    font-family: inherit;
+}
+
+.page-nav-jump-btn:hover::after {
+    opacity: 1;
+}
+
+/* ========== ANIMATIONS ========== */
+
+/* Pulse animation for active button */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6);
+    }
+}
+
+/* Slide in animation for new buttons */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.page-nav-btn.new {
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth scrolling behavior */
+.page-navigation {
+    scroll-behavior: smooth;
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+
+/* Dark mode container */
+.page-navigation.dark-mode {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(100, 116, 139, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.page-navigation.dark-mode::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+}
+
+.page-navigation.dark-mode::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+}
+
+/* Dark mode button */
+.page-nav-btn.dark-mode {
+    background: rgba(51, 65, 85, 0.9);
+    color: #cbd5e1;
+    border-color: rgba(100, 116, 139, 0.5);
+}
+
+.page-nav-btn.dark-mode:hover {
+    border-color: #3b82f6;
+    background: rgba(51, 65, 85, 0.9);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.page-nav-btn.dark-mode.current {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-color: #2563eb;
+}
+
+/* Dark mode page count display */
+.page-count-display.dark-mode {
+    background: rgba(71, 85, 105, 0.5);
+    color: #cbd5e1;
+    border-color: rgba(100, 116, 139, 0.5);
+}
+
+/* Dark mode jump button */
+.page-nav-jump-btn.dark-mode {
+    background: linear-gradient(135deg, #a78bfa, #9333ea);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.page-nav-jump-btn.dark-mode:hover {
+    background: linear-gradient(135deg, #9333ea, #7e22ce);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+    .page-navigation {
+        right: 15px;
+        gap: 6px;
+        padding: 10px 6px;
+    }
+
+    .page-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .page-nav-jump-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+}
+
+/* Mobile Landscape */
+@media (max-width: 768px) {
+    .page-navigation {
+        right: 10px;
+        bottom: 80px;
+        top: auto;
+        transform: none;
+        flex-direction: row;
+        max-height: none;
+        max-width: 300px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 6px;
+    }
+
+    .page-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .page-nav-btn::after {
+        bottom: 100%;
+        right: 50%;
+        top: auto;
+        transform: translateX(50%) translateY(-8px);
+    }
+
+    .page-count-display {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        padding: 6px;
+        margin: 0 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .page-nav-jump-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+        margin: 0;
+        border: none;
+        padding: 0;
+        margin-left: 6px;
+        border-left: 1px solid #e2e8f0;
+        padding-left: 6px;
+    }
+
+    .page-nav-jump-btn::after {
+        bottom: 100%;
+        right: 50%;
+        top: auto;
+        transform: translateX(50%) translateY(-8px);
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 576px) {
+    .page-navigation {
+        right: 8px;
+        bottom: 70px;
+        max-width: 280px;
+        gap: 4px;
+        padding: 8px 4px;
+    }
+
+    .page-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 11px;
+        border-width: 1px;
+    }
+
+    .page-count-display {
+        padding: 4px;
+        font-size: 10px;
+        margin: 0 4px;
+    }
+
+    .page-nav-jump-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 12px;
+        padding-left: 4px;
+    }
+}
+
+/* ========== UTILITIES ========== */
+
+/* Scrollbar gutter for stable layout */
+@supports (scrollbar-gutter: stable) {
+    .page-navigation {
+        scrollbar-gutter: stable;
+    }
+}
+
+/* Print styles - hide navigation */
+@media print {
+    .page-navigation {
+        display: none !important;
+    }
+}

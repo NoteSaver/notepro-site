@@ -1,0 +1,43 @@
+/* ================================================================== */
+/* PAGE AND OVERFLOW MANAGEMENT STYLES */
+/* ================================================================== */
+
+/* Base Page Styling (A4 Portrait - 210mm x 297mm) */
+.editor-page {
+    /* A4 साइज़ के लिए W: 794px, H: 1123px (72dpi पर) */
+    width: 210mm; 
+    min-height: 297mm; /* min-height से शुरुआत ताकि JavaScript इसकी ऊंचाई एडजस्ट करे */
+    margin-bottom: 25px;
+    background-color: white !important; /* Force white background */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    position: relative; /* पेज नंबर/इंडिकेटर के लिए */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Content Area - The Editable Part */
+.page-content {
+    /* A4 मार्जिन: 25.4mm (1 inch) */
+    padding: 2.54cm; 
+    min-height: 297mm; /* पेरेंट पेज के बराबर मिनिमम ऊंचाई */
+    /* **CRITICAL FOR OVERFLOW HANDLING**: 
+       Hidden overflow से ब्राउज़र scrollbar नहीं दिखाता, 
+       जिससे कंटेंट पेज के बाहर जाते ही JavaScript को ट्रिगर करने का मौका मिलता है। */
+    overflow: hidden; 
+    box-sizing: border-box;
+    outline: none; /* फोकस बॉर्डर हटा दें */
+    font-size: 12pt;
+    line-height: 1.6;
+    word-wrap: break-word; /* लंबे शब्दों को तोड़ता है */
+    background-color: white !important; /* Force white background */
+}
+
+/* Different Paper Sizes (Example for Letter) */
+.pages-container.paper-letter .editor-page {
+    width: 8.5in; /* 215.9mm */
+    min-height: 11in; /* 279.4mm */
+}
+/* Note: You'd need more specific selectors for other sizes (a3, legal, etc.) 
+   based on the 'paper-X' classes applied to `.pages-container`. */
+
+   

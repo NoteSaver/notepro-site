@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Login - NoteSaver Pro{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <!-- Login Icon -->
+        <div class="login-icon">
+            <i class="fas fa-user-circle"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="login-title">Welcome Back!</h1>
+        <p class="login-subtitle">Sign in to your account</p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'danger' else 'info-circle' }}"></i>
+                    {{ message | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('login', next=request.args.get('next', '')) }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Username Field -->
+            <div class="form-group">
+                {{ form.username.label(class="form-label") }}
+                <div class="input-group">
+                    <i class="fas fa-user input-icon"></i>
+                    {{ form.username(class="form-control", placeholder="Username or Email") }}
+                </div>
+                {% for error in form.username.errors %}
+                    <div class="form-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    {{ form.password(class="form-control", placeholder="Enter your password", type="password") }}
+                </div>
+                {% for error in form.password.errors %}
+                    <div class="form-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Forgot Links -->
+            <div class="forgot-links">
+                <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot Password?</a>
+                <a href="{{ url_for('request_username_reminder') }}" class="forgot-link">Forgot Username?</a>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="login-footer">
+            Don't have an account? 
+            <a href="{{ url_for('register') }}" class="signup-link">Sign up here</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ==================== LOGIN PAGE STYLES ==================== */
+/* ✅ FOOTER CSS base.html se inherit hoga - duplicate remove kiya gaya */
+
+.login-container {
+    min-height: calc(100vh - var(--navbar-height) - 150px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.login-card {
+    background: white;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    animation: fadeInUp 0.6s ease;
+}
+
+body.dark-theme .login-card {
+    background: #1e293b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+}
+
+.login-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-theme .login-title {
+    color: #e2e8f0;
+}
+
+.login-subtitle {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+body.dark-theme .login-subtitle {
+    color: #94a3b8;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    display: block;
+}
+
+body.dark-theme .form-label {
+    color: #e2e8f0;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+body.dark-theme .input-icon {
+    color: #94a3b8;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid var(--gray-200);
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--gray-50);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    background: white;
+    outline: none;
+}
+
+body.dark-theme .form-control {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-control:focus {
+    background: #1e293b;
+    border-color: var(--primary);
+}
+
+.form-error {
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.forgot-links {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    margin-top: -0.5rem;
+    font-size: 0.875rem;
+}
+
+.forgot-link {
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.forgot-link:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+body.dark-theme .login-footer {
+    border-top-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+.signup-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.signup-link:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 2rem 1.5rem;
+        max-width: 100%;
+    }
+
+    .login-icon {
+        width: 70px;
+        height: 70px;
+    }
+
+    .login-icon i {
+        font-size: 2rem;
+    }
+
+    .login-title {
+        font-size: 1.5rem;
+    }
+
+    .forgot-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

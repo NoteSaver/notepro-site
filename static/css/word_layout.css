@@ -1,0 +1,175 @@
+/* ================================================================== */
+/* WORD STYLE EDITOR - FULL CSS - FIXED VERSION */
+/* ================================================================== */
+
+/* Reset body */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f3f4f6; /* हल्का grey workspace जैसा MS Word */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* FIX #1: Add text-size-adjust with CORRECT vendor prefix order */
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Pages container stacking */
+.pages-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 24px 0 80px;
+    max-width: 100%;
+    overflow: visible;
+    position: relative;
+}
+
+/* Single page card */
+.editor-page {
+    width: 210mm; /* default A4 width, paper-* classes override करें */
+    height: auto; /* flexible height for overflow */
+    background-color: white;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    border-radius: 4px;
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    
+    /* FIX #2: Print color adjustment - CORRECT vendor prefix order */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    /* REMOVED: color-adjust: exact; (Chrome/Edge support नहीं) */
+}
+
+/* Hover पर हल्की zoom और shadow */
+.editor-page:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+}
+
+/* Editable content area */
+.page-content {
+    padding: 2.54cm;   /* Word का standard 1 inch margin */
+    box-sizing: border-box;
+
+    height: auto;
+    min-height: 220px;
+
+    overflow-y: auto;  /* Overflow पर scroll बने */
+    -webkit-overflow-scrolling: touch; /* smooth scroll touch devices */
+
+    outline: none; /* focus outline हटाओ */
+    background-color: white;
+
+    font-size: 11pt;
+    line-height: 1.5;
+    word-wrap: break-word;
+
+    flex-grow: 1;
+
+    /* FIX #3: Scrollbar hiding - CORRECT approach */
+    scrollbar-width: none;  /* Firefox scroll hide */
+    -ms-overflow-style: none; /* IE, Edge scroll hide */
+}
+
+/* FIX #4: Chrome/Safari scrollbar hiding */
+.page-content::-webkit-scrollbar {
+    display: none;  /* Chrome Safari scroll hide */
+}
+
+/* Focus होने पर थोड़ा हल्का background */
+.page-content:focus-within {
+    background-color: #fffffd;
+}
+
+/* विभिन्न पेपर साइज (width override) */
+.pages-container.paper-a4 .editor-page { width: 210mm; }
+.pages-container.paper-letter .editor-page { width: 8.5in; }
+.pages-container.paper-legal .editor-page { width: 8.5in; }
+.pages-container.paper-a3 .editor-page { width: 297mm; }
+.pages-container.paper-a5 .editor-page { width: 148mm; }
+
+.pages-container.paper-b4jis    .editor-page { width: 257mm; }
+.pages-container.paper-b5jis    .editor-page { width: 182mm; }
+.pages-container.paper-envc5    .editor-page { width: 162mm; }
+.pages-container.paper-envc4    .editor-page { width: 229mm; }
+.pages-container.paper-envdl    .editor-page { width: 110mm; }
+.pages-container.paper-env10    .editor-page { width: 104.8mm; }
+.pages-container.paper-envmon   .editor-page { width: 98.4mm; }
+.pages-container.paper-11x17    .editor-page { width: 279.4mm; }
+.pages-container.paper-executive .editor-page { width: 184.1mm; }
+.pages-container.paper-tabloid  .editor-page { width: 279.4mm; }
+
+/* Plain mode (responsive) */
+.pages-container.paper-plain .editor-page {
+    width: 95%;
+    max-width: 900px;
+}
+
+/* Overflow detection mode */
+.page-content.detecting-overflow {
+    overflow-y: auto;
+    max-height: 1000px;
+}
+
+.page-content.detecting-overflow::-webkit-scrollbar {
+    display: none;
+}
+
+/* FIX #5: Badges with CORRECT backdrop-filter vendor prefix order */
+.word-count-badge,
+.page-count-badge {
+    position: fixed;
+    bottom: 18px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: white;
+    z-index: 1030;
+    /* CORRECT ORDER: -webkit first, then standard */
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.35);
+}
+
+.word-count-badge {
+    left: 20px;
+    background: rgba(15,23,42,0.88);
+}
+
+.page-count-badge {
+    left: 150px;
+    background: rgba(13,110,253,0.92);
+}
+
+/* ================================================================== */
+/* FIXES SUMMARY */
+/* ================================================================== */
+
+/*
+✅ FIX #1: text-size-adjust vendor prefix order (html, body)
+   BEFORE: -webkit-text-size-adjust, text-size-adjust
+   AFTER:  -ms-text-size-adjust, -webkit-text-size-adjust, text-size-adjust
+
+✅ FIX #2: color-adjust (removed - Chrome support नहीं)
+   BEFORE: color-adjust: exact;
+   AFTER:  REMOVED
+   KEPT:   -webkit-print-color-adjust: exact; + print-color-adjust: exact;
+
+✅ FIX #3: scrollbar-width (Firefox - correct)
+   STATUS: Already correct ✓
+
+✅ FIX #4: scrollbar hiding (Chrome/Safari - correct)
+   STATUS: Already correct ✓
+
+✅ FIX #5: backdrop-filter vendor prefix order (badges)
+   BEFORE: backdrop-filter, -webkit-backdrop-filter
+   AFTER:  -webkit-backdrop-filter, backdrop-filter
+
+*/

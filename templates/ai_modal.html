@@ -1,0 +1,199 @@
+{# AI Writing Assistant Modal - Complete Integration #}
+{# Include this in your base.html or dashboard.html before closing </body> tag #}
+
+<!-- AI Assistant Styles -->
+<link href="{{ url_for('static', filename='css/ai_modal.css') }}" rel="stylesheet">
+
+<!-- Advanced AI Writing Assistant Panel -->
+<div id="aiSlider" class="ai-slider">
+    <!-- Floating Toggle Button -->
+    <button class="ai-toggle-btn" id="aiToggleBtn" aria-label="Open AI Assistant" title="AI Assistant (Alt+A)">
+        <i class="fas fa-robot"></i>
+        <span class="status-indicator"></span>
+    </button>
+
+    <!-- Main AI Panel -->
+    <div class="ai-panel" id="aiPanel">
+        <!-- Header -->
+        <div class="ai-header">
+            <div class="d-flex align-items-center">
+                <div class="ai-avatar">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="ms-2">
+                    <strong>AI Assistant Pro</strong>
+                    <div class="ai-status-text">Ready to help</div>
+                </div>
+            </div>
+            <button class="btn-close btn-close-white" id="closeAiBtn" aria-label="Close"></button>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="ai-tabs">
+            <button class="ai-tab active" data-tab="features">
+                <i class="fas fa-magic"></i> Features
+            </button>
+            <button class="ai-tab" data-tab="chat">
+                <i class="fas fa-comments"></i> Chat
+            </button>
+            <button class="ai-tab" data-tab="history">
+                <i class="fas fa-history"></i> History
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="ai-body">
+            <!-- Features Tab -->
+            <div class="tab-content active" data-content="features">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn" data-feature="grammar" title="Fix grammar & spelling errors">
+                        <i class="fas fa-spell-check"></i>
+                        <span>Grammar</span>
+                    </button>
+                    <button class="action-btn" data-feature="improve" title="Enhance writing quality">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span>Improve</span>
+                    </button>
+                    <button class="action-btn" data-feature="summarize" title="Create concise summary">
+                        <i class="fas fa-compress"></i>
+                        <span>Summarize</span>
+                    </button>
+                    <button class="action-btn" data-feature="expand" title="Expand with details">
+                        <i class="fas fa-expand"></i>
+                        <span>Expand</span>
+                    </button>
+                    <button class="action-btn" data-feature="translate" title="Translate content">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </button>
+                    <button class="action-btn" data-feature="tone" title="Adjust writing tone">
+                        <i class="fas fa-theater-masks"></i>
+                        <span>Tone</span>
+                    </button>
+                    <button class="action-btn" data-feature="bullet-points" title="Convert to bullets">
+                        <i class="fas fa-list-ul"></i>
+                        <span>Bullets</span>
+                    </button>
+                    <button class="action-btn" data-feature="continue" title="Continue writing">
+                        <i class="fas fa-forward"></i>
+                        <span>Continue</span>
+                    </button>
+                </div>
+
+                <!-- Advanced Options -->
+                <div class="advanced-options">
+                    <div class="option-group">
+                        <label>
+                            <i class="fas fa-palette"></i> Tone
+                        </label>
+                        <select id="toneSelect" class="form-select">
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="academic">Academic</option>
+                            <option value="creative">Creative</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label>
+                            <i class="fas fa-globe"></i> Language
+                        </label>
+                        <select id="targetLanguage" class="form-select">
+                            <option value="en">English</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Word Count Display -->
+                <div class="word-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-font"></i>
+                        <span id="wordCount">0</span> words
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-align-left"></i>
+                        <span id="charCount">0</span> chars
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Tab -->
+            <div class="tab-content" data-content="chat">
+                <div class="chat-container" id="chatContainer">
+                    <div class="welcome-message">
+                        <i class="fas fa-comments"></i>
+                        <p>Start a conversation with AI</p>
+                        <small>Ask me anything or give instructions</small>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-wrapper">
+                    <div class="input-with-voice">
+                        <textarea id="chatInput" 
+                                  placeholder="Ask AI anything... (Ctrl+Enter to send)" 
+                                  rows="2"
+                                  maxlength="500"></textarea>
+                        <button class="voice-btn" id="voiceBtn" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <button class="send-btn" id="sendChatBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div class="tab-content" data-content="history">
+                <div class="history-controls">
+                    <button class="btn-sm btn-outline" id="clearHistoryBtn">
+                        <i class="fas fa-trash"></i> Clear History
+                    </button>
+                    <button class="btn-sm btn-outline" id="exportHistoryBtn">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <p>No history yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Indicator -->
+            <div id="aiProcessing" class="processing-indicator" style="display:none;">
+                <div class="spinner"></div>
+                <span>AI is thinking...</span>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="ai-footer">
+            <div class="usage-info">
+                <span id="requestCount">0</span>/50 requests today
+            </div>
+            <button class="help-btn" id="helpBtn" title="Help & Shortcuts">
+                <i class="fas fa-question-circle"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- AI Assistant Script - MUST BE LOADED AFTER HTML -->
+<script src="{{ url_for('static', filename='js/ai_modal.js') }}" defer></script>
+

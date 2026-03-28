@@ -1,0 +1,62 @@
+/* 
+ * Zoom Scale CSS for NotePro Professional Editor
+ * This CSS makes the note editor appear at 80% size without breaking the layout
+ * Compatible with notepro-professional.css
+ */
+
+/* Use CSS zoom property - Best compatibility and clean approach */
+html {
+    zoom: 0.8;
+}
+
+/* Ensure the zoom works smoothly in Firefox */
+@-moz-document url-prefix() {
+    html {
+        -moz-transform: scale(0.8);
+        -moz-transform-origin: top left;
+    }
+}
+
+/* Prevent any overflow issues */
+html,
+body {
+    overflow-x: hidden;
+}
+
+/* Maintain smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Ensure fixed elements (like badges and indicators) scale properly */
+.word-count-badge,
+.page-count-badge,
+.draft-indicator {
+    /* These will automatically scale with the zoom property */
+}
+
+/* Ensure toolbar remains functional at 80% zoom */
+.editor-toolbar {
+    /* Will automatically scale with zoom */
+}
+
+/* Ensure page content scales properly */
+.editor-page,
+.page-content {
+    /* Will automatically scale with zoom */
+}
+
+/* Alternative method if zoom property doesn't work (uncomment if needed) */
+/*
+body {
+    transform: scale(0.8);
+    transform-origin: top left;
+    width: 125%;
+    min-height: 125vh;
+}
+
+.note-editor-wrapper {
+    width: 100%;
+    min-height: 100vh;
+}
+*/

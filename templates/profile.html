@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+{% block title %}My Profile — NoteSaver Pro{% endblock %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+<style>
+/* ═══════════════════════════════════════════════
+   PROFILE PAGE — FRESH GLASSMORPHISM LIGHT THEME
+═══════════════════════════════════════════════ */
+
+:root {
+  --pg-primary:    #2563eb;
+  --pg-secondary:  #1e40af;
+  --pg-accent:     #f59e0b;
+  --pg-success:    #10b981;
+  --pg-danger:     #ef4444;
+  --pg-purple:     #7c3aed;
+  --pg-pink:       #ec4899;
+  --pg-glass:      rgba(255,255,255,0.72);
+  --pg-glass-b:    rgba(255,255,255,0.45);
+  --pg-border:     rgba(37,99,235,0.10);
+  --pg-shadow:     0 8px 32px rgba(37,99,235,0.10);
+  --pg-shadow-xl:  0 20px 60px rgba(37,99,235,0.15);
+  --pg-text:       #0f172a;
+  --pg-text-muted: #64748b;
+  --pg-radius:     18px;
+  --pg-radius-sm:  10px;
+}
+
+/* ── Page wrapper ── */
+.pg-wrapper {
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg,#eff6ff 0%,#f0fdf4 50%,#fef9c3 100%);
+  padding: 2.5rem 0 4rem;
+}
+
+/* ── Breadcrumb bar ── */
+.pg-breadcrumb {
+  display: flex; align-items: center; gap: .5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem; color: var(--pg-text-muted);
+  text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 2rem;
+}
+.pg-breadcrumb a { color: var(--pg-primary); text-decoration: none; }
+.pg-breadcrumb a:hover { text-decoration: underline; }
+.pg-breadcrumb span { color: var(--pg-text-muted); }
+
+/* ── Hero banner ── */
+.pg-hero {
+  background: linear-gradient(135deg, var(--pg-primary) 0%, var(--pg-purple) 100%);
+  border-radius: var(--pg-radius);
+  padding: 2.5rem 2.5rem 5rem;
+  position: relative; overflow: hidden;
+  margin-bottom: -3.5rem;
+  box-shadow: var(--pg-shadow-xl);
+}
+.pg-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+.pg-hero-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 1.5rem;
+}
+.pg-hero h1 {
+  font-size: 1.75rem; font-weight: 800;
+  color: #fff; margin: 0 0 .3rem;
+  font-family: 'Poppins', sans-serif;
+}
+.pg-hero p { color: rgba(255,255,255,.75); margin: 0; font-size: .9rem; }
+.pg-hero-badge {
+  margin-left: auto;
+  background: rgba(255,255,255,.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 50px;
+  color: #fff; font-family: 'DM Mono', monospace;
+  font-size: .7rem; padding: .4rem 1rem;
+  letter-spacing: .08em;
+}
+.pg-hero-badge i { color: var(--pg-accent); margin-right: .3rem; }
+
+/* ── Sidebar ── */
+.pg-sidebar {
+  background: var(--pg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius);
+  box-shadow: var(--pg-shadow);
+  overflow: hidden;
+}
+.pg-sidebar-label {
+  padding: 1rem 1.25rem .5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem; text-transform: uppercase;
+  letter-spacing: .15em; color: var(--pg-text-muted);
+  border-bottom: 1px solid var(--pg-border);
+}
+.pg-nav-link {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .85rem 1.25rem;
+  color: var(--pg-text-muted);
+  text-decoration: none; font-weight: 500;
+  font-size: .875rem;
+  border-left: 3px solid transparent;
+  transition: all .2s;
+}
+.pg-nav-link:hover {
+  background: rgba(37,99,235,.05);
+  color: var(--pg-primary);
+  border-left-color: rgba(37,99,235,.3);
+}
+.pg-nav-link.active {
+  background: rgba(37,99,235,.08);
+  color: var(--pg-primary);
+  border-left-color: var(--pg-primary);
+  font-weight: 700;
+}
+.pg-nav-link i { width: 18px; text-align: center; font-size: 1rem; }
+.pg-nav-link.upgrade { color: var(--pg-accent); }
+.pg-nav-link.upgrade:hover { background: rgba(245,158,11,.08); border-left-color: var(--pg-accent); }
+
+/* ── Stat cards ── */
+.pg-stat {
+  border-radius: var(--pg-radius);
+  padding: 1.35rem 1.5rem;
+  display: flex; align-items: center; gap: 1.1rem;
+  box-shadow: var(--pg-shadow);
+  position: relative; overflow: hidden;
+  transition: transform .25s, box-shadow .25s;
+}
+.pg-stat:hover { transform: translateY(-3px); box-shadow: var(--pg-shadow-xl); }
+.pg-stat-blue  { background: linear-gradient(135deg,#2563eb,#3b82f6); }
+.pg-stat-green { background: linear-gradient(135deg,#10b981,#34d399); }
+.pg-stat-gold  { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+.pg-stat-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; color: #fff; flex-shrink: 0;
+}
+.pg-stat-label {
+  color: rgba(255,255,255,.8); font-size: .72rem;
+  font-family: 'DM Mono', monospace; text-transform: uppercase;
+  letter-spacing: .1em; margin-bottom: .2rem;
+}
+.pg-stat-value {
+  color: #fff; font-size: 1.5rem; font-weight: 800;
+  line-height: 1; font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+.pg-stat::after {
+  content: ''; position: absolute; right: -20px; bottom: -20px;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+
+/* ── Main card ── */
+.pg-card {
+  background: var(--pg-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius);
+  box-shadow: var(--pg-shadow);
+  overflow: hidden;
+}
+.pg-card-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--pg-border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(37,99,235,.03);
+}
+.pg-card-header h4 {
+  font-size: 1rem; font-weight: 700; color: var(--pg-text);
+  margin: 0; display: flex; align-items: center; gap: .6rem;
+  font-family: 'Poppins', sans-serif;
+}
+.pg-card-header h4 i { color: var(--pg-primary); font-size: .9rem; }
+.pg-card-body { padding: 2rem; }
+
+/* ── Edit button ── */
+.btn-pg-edit {
+  background: rgba(37,99,235,.08);
+  border: 1.5px solid rgba(37,99,235,.2);
+  color: var(--pg-primary);
+  padding: .45rem 1.2rem; border-radius: 50px;
+  font-size: .8rem; font-weight: 600;
+  transition: all .2s; cursor: pointer;
+  display: flex; align-items: center; gap: .4rem;
+}
+.btn-pg-edit:hover {
+  background: var(--pg-primary); color: #fff;
+  border-color: var(--pg-primary);
+  box-shadow: 0 4px 15px rgba(37,99,235,.3);
+}
+
+/* ── Avatar section ── */
+.pg-avatar-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1rem;
+}
+.pg-avatar-ring {
+  position: relative; width: 130px; height: 130px;
+}
+.pg-avatar-ring::before {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,var(--pg-primary),var(--pg-purple),var(--pg-pink));
+  z-index: 0;
+}
+.pg-avatar-img, .pg-avatar-default {
+  position: absolute; inset: 4px;
+  border-radius: 50%; z-index: 1;
+}
+.pg-avatar-img { object-fit: cover; width: calc(100% - 8px); height: calc(100% - 8px); }
+.pg-avatar-default {
+  background: linear-gradient(135deg,var(--pg-primary),var(--pg-purple));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.8rem; font-weight: 800; color: #fff;
+  font-family: 'Poppins', sans-serif;
+}
+.pg-avatar-overlay {
+  position: absolute; inset: 4px; border-radius: 50%; z-index: 2;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s; cursor: pointer;
+}
+.pg-avatar-ring:hover .pg-avatar-overlay { opacity: 1; }
+.pg-avatar-overlay button {
+  background: rgba(255,255,255,.9); border: none;
+  border-radius: 50%; width: 40px; height: 40px;
+  color: var(--pg-primary); font-size: .95rem;
+  cursor: pointer; transition: transform .2s;
+}
+.pg-avatar-overlay button:hover { transform: scale(1.1); }
+.pg-avatar-hint {
+  font-size: .72rem; color: var(--pg-text-muted);
+  font-family: 'DM Mono', monospace; text-align: center;
+}
+
+/* ── Form inputs ── */
+.pg-label {
+  font-size: .75rem; font-weight: 600;
+  color: var(--pg-text); text-transform: uppercase;
+  letter-spacing: .06em; margin-bottom: .5rem;
+  display: flex; align-items: center; gap: .4rem;
+}
+.pg-label i { color: var(--pg-primary); font-size: .75rem; }
+.pg-input {
+  background: rgba(255,255,255,.8);
+  border: 1.5px solid rgba(37,99,235,.12);
+  border-radius: var(--pg-radius-sm);
+  color: var(--pg-text); font-size: .9rem;
+  padding: .7rem 1rem; width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+  font-family: 'Inter', sans-serif;
+}
+.pg-input:focus {
+  outline: none; border-color: var(--pg-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+  background: #fff;
+}
+.pg-input[readonly] {
+  background: rgba(241,245,249,.9);
+  color: var(--pg-text-muted); cursor: not-allowed;
+  border-style: dashed;
+}
+.pg-input-hint {
+  font-size: .72rem; color: var(--pg-text-muted);
+  font-family: 'DM Mono', monospace;
+  display: flex; align-items: center; gap: .35rem; margin-top: .35rem;
+}
+.pg-input-hint i { color: var(--pg-accent); font-size: .7rem; }
+textarea.pg-input { resize: vertical; min-height: 80px; }
+.pg-char-counter {
+  font-size: .7rem; font-family: 'DM Mono', monospace;
+  color: var(--pg-text-muted);
+}
+
+/* ── Form actions ── */
+.pg-actions {
+  display: flex; justify-content: flex-end; gap: .75rem;
+  padding-top: 1.5rem; margin-top: 1.5rem;
+  border-top: 1px solid var(--pg-border);
+}
+.btn-pg-save {
+  background: linear-gradient(135deg,var(--pg-primary),var(--pg-purple));
+  color: #fff; border: none;
+  border-radius: 50px; padding: .6rem 1.8rem;
+  font-weight: 700; font-size: .85rem;
+  transition: all .25s; box-shadow: 0 4px 15px rgba(37,99,235,.3);
+}
+.btn-pg-save:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37,99,235,.4); }
+.btn-pg-save:disabled { opacity: .55; cursor: not-allowed; }
+.btn-pg-cancel {
+  background: rgba(100,116,139,.1); border: 1.5px solid rgba(100,116,139,.2);
+  color: var(--pg-text-muted); border-radius: 50px;
+  padding: .6rem 1.5rem; font-weight: 600; font-size: .85rem;
+  transition: all .2s;
+}
+.btn-pg-cancel:hover { background: rgba(100,116,139,.18); }
+
+/* ── Danger zone ── */
+.pg-danger {
+  background: rgba(239,68,68,.04);
+  border: 1.5px dashed rgba(239,68,68,.25);
+  border-radius: var(--pg-radius);
+  padding: 1.5rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+}
+.pg-danger-title {
+  font-size: .95rem; font-weight: 700; color: var(--pg-danger);
+  font-family: 'Poppins', sans-serif; margin-bottom: .25rem;
+}
+.pg-danger-text { font-size: .825rem; color: var(--pg-text-muted); margin: 0; }
+.btn-pg-danger {
+  background: var(--pg-danger); color: #fff; border: none;
+  border-radius: 50px; padding: .6rem 1.5rem;
+  font-weight: 700; font-size: .83rem;
+  transition: all .25s; white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(239,68,68,.25);
+}
+.btn-pg-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(239,68,68,.4); }
+
+/* ── Modal ── */
+.pg-modal .modal-content {
+  border: none; border-radius: var(--pg-radius);
+  box-shadow: 0 30px 80px rgba(0,0,0,.18);
+  background: #fff;
+}
+.pg-modal .modal-header {
+  background: linear-gradient(135deg,#ef4444,#dc2626);
+  border-radius: var(--pg-radius) var(--pg-radius) 0 0;
+  padding: 1.25rem 1.75rem;
+}
+.pg-modal .modal-title { color: #fff; font-weight: 700; font-family:'Poppins',sans-serif; }
+.pg-modal .modal-body { padding: 1.75rem; }
+.pg-modal .modal-footer {
+  padding: 1rem 1.75rem;
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+.pg-code-box {
+  background: #fef2f2; border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px; padding: .75rem 1rem; margin: 1rem 0;
+}
+.pg-code-box code { color: var(--pg-danger); font-family: 'DM Mono',monospace; font-weight: 600; }
+
+/* ── Toast ── */
+.pg-toast-wrap { position: fixed; top: 80px; right: 1.5rem; z-index: 1100; }
+.pg-toast {
+  min-width: 300px; border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  margin-bottom: .5rem; overflow: hidden;
+}
+.pg-toast-body {
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem 1.25rem; font-weight: 600; font-size: .875rem;
+}
+.pg-toast-success { background: #f0fdf4; border: 1px solid rgba(16,185,129,.25); color: #065f46; }
+.pg-toast-error   { background: #fef2f2; border: 1px solid rgba(239,68,68,.25); color: #991b1b; }
+.pg-toast-info    { background: #eff6ff; border: 1px solid rgba(37,99,235,.25); color: #1e40af; }
+.pg-toast-success i { color: var(--pg-success); }
+.pg-toast-error   i { color: var(--pg-danger); }
+.pg-toast-info    i { color: var(--pg-primary); }
+.pg-toast .btn-close { margin-left: auto; opacity: .6; }
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+  .pg-hero { padding: 2rem 1.5rem 4.5rem; }
+  .pg-card-body { padding: 1.5rem; }
+  .pg-danger { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 576px) {
+  .pg-hero h1 { font-size: 1.35rem; }
+  .pg-avatar-ring { width: 100px; height: 100px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg-wrapper">
+<div class="container-fluid px-3 px-lg-5">
+
+  <!-- Breadcrumb -->
+  <nav class="pg-breadcrumb">
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-home me-1"></i>Dashboard</a>
+    <span>/</span>
+    <span style="color:var(--pg-primary); font-weight:600;">My Profile</span>
+  </nav>
+
+  <div class="row g-4">
+
+    <!-- ─────────── Sidebar ─────────── -->
+    <div class="col-lg-3">
+      <div class="pg-sidebar sticky-top" style="top:90px;">
+        <div class="pg-sidebar-label">Menu</div>
+
+        <a href="{{ url_for('dashboard') }}" class="pg-nav-link">
+          <i class="fas fa-tachometer-alt"></i>Dashboard
+        </a>
+        <a href="{{ url_for('profile') }}" class="pg-nav-link active">
+          <i class="fas fa-user-circle"></i>My Profile
+        </a>
+        <a href="{{ url_for('settings') }}" class="pg-nav-link">
+          <i class="fas fa-cog"></i>Settings
+        </a>
+        {% if not current_user.is_premium_active() %}
+        <a href="{{ url_for('premium') }}" class="pg-nav-link upgrade">
+          <i class="fas fa-crown"></i>Upgrade Pro
+        </a>
+        {% endif %}
+
+        <!-- Mini avatar card inside sidebar -->
+        <div style="margin:1rem; padding:1.25rem; background:linear-gradient(135deg,rgba(37,99,235,.07),rgba(124,58,237,.07)); border-radius:12px; border:1px solid rgba(37,99,235,.1); text-align:center;">
+          {% if current_user.profile_picture_url %}
+            <img src="{{ current_user.profile_picture_url }}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:.6rem;">
+          {% else %}
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--pg-primary),var(--pg-purple));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;margin:0 auto .6rem;font-family:'Poppins',sans-serif;">
+              {{ current_user.username[0]|upper }}
+            </div>
+          {% endif %}
+          <div style="font-weight:700;font-size:.85rem;color:var(--pg-text);font-family:'Poppins',sans-serif;">
+            {% if current_user.first_name %}{{ current_user.first_name }} {{ current_user.last_name or '' }}{% else %}{{ current_user.username }}{% endif %}
+          </div>
+          <div style="font-size:.72rem;color:var(--pg-text-muted);font-family:'DM Mono',monospace;">{{ current_user.email }}</div>
+          {% if current_user.is_premium_active() %}
+          <div style="margin-top:.5rem;">
+            <span style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0f172a;font-size:.65rem;font-weight:700;padding:.25rem .75rem;border-radius:50px;font-family:'DM Mono',monospace;letter-spacing:.08em;">
+              <i class="fas fa-crown me-1"></i>PREMIUM
+            </span>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────── Main ─────────── -->
+    <div class="col-lg-9">
+
+      <!-- Hero banner -->
+      <div class="pg-hero">
+        <div class="pg-hero-inner">
+          <div>
+            <h1><i class="fas fa-user-circle me-2" style="opacity:.9;"></i>Account Overview</h1>
+            <p>Welcome back, <strong style="color:#fff;">
+              {% if current_user.first_name %}{{ current_user.first_name }}{% else %}{{ current_user.username }}{% endif %}
+            </strong> — manage your personal details below.</p>
+          </div>
+          <div class="pg-hero-badge ms-auto">
+            <i class="fas fa-calendar-check"></i>
+            Member since
+            {% if current_user.created_at %}{{ current_user.created_at.strftime('%b %Y') }}{% else %}—{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="row g-3 mt-0 mb-4" style="padding-top:4.5rem;">
+        <div class="col-md-4">
+          <div class="pg-stat pg-stat-blue">
+            <div class="pg-stat-icon"><i class="fas fa-sticky-note"></i></div>
+            <div>
+              <p class="pg-stat-label">Total Notes</p>
+              <h3 class="pg-stat-value" id="totalNotesStat">—</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="pg-stat pg-stat-green">
+            <div class="pg-stat-icon"><i class="fas fa-history"></i></div>
+            <div>
+              <p class="pg-stat-label">Last Active</p>
+              <h3 class="pg-stat-value" id="lastActivityStat" style="font-size:1rem;">—</h3>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="pg-stat pg-stat-gold">
+            <div class="pg-stat-icon"><i class="fas fa-gem"></i></div>
+            <div>
+              <p class="pg-stat-label">Plan</p>
+              <h3 class="pg-stat-value" id="tierStat" style="font-size:1.1rem;">
+                {% if current_user.is_premium_active() %}Premium{% else %}Free{% endif %}
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Details Card -->
+      <div class="pg-card mb-4">
+        <div class="pg-card-header">
+          <h4><i class="fas fa-id-card-alt"></i>Personal Details</h4>
+          <button class="btn-pg-edit" id="editProfileBtn">
+            <i class="fas fa-pencil-alt"></i>Edit Profile
+          </button>
+        </div>
+        <div class="pg-card-body">
+          <form id="profileForm">
+            <div class="row g-4">
+
+              <!-- Avatar -->
+              <div class="col-lg-3">
+                <div class="pg-avatar-wrap">
+                  <div class="pg-avatar-ring">
+                    {% if current_user.profile_picture_url %}
+                      <img src="{{ current_user.profile_picture_url }}"
+                           class="pg-avatar-img" id="profilePicture"
+                           alt="{{ current_user.username }}">
+                    {% else %}
+                      <div class="pg-avatar-default" id="profilePicture">
+                        {{ current_user.username[0]|upper }}
+                      </div>
+                    {% endif %}
+                    <div class="pg-avatar-overlay">
+                      <button type="button" id="changePictureBtn" aria-label="Change picture">
+                        <i class="fas fa-camera"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <input type="file" id="profilePictureInput" class="d-none" accept="image/*">
+                  <button type="button" class="btn-pg-danger d-none" id="removePictureBtn"
+                          style="font-size:.75rem;padding:.35rem .9rem;">
+                    <i class="fas fa-trash-alt me-1"></i>Remove
+                  </button>
+                  <p class="pg-avatar-hint"><i class="fas fa-info-circle me-1" style="color:var(--pg-primary);"></i>JPG / PNG · max 5 MB</p>
+                </div>
+              </div>
+
+              <!-- Fields -->
+              <div class="col-lg-9">
+                <div class="row g-3">
+
+                  <div class="col-md-6">
+                    <label for="username" class="pg-label"><i class="fas fa-at"></i>Username</label>
+                    <input type="text" class="pg-input" id="username"
+                           value="{{ current_user.username }}" readonly autocomplete="username">
+                    <p class="pg-input-hint"><i class="fas fa-lock"></i>Cannot be changed</p>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="email" class="pg-label"><i class="fas fa-envelope"></i>Email</label>
+                    <input type="email" class="pg-input" id="email"
+                           value="{{ current_user.email }}" readonly autocomplete="email">
+                    <p class="pg-input-hint"><i class="fas fa-lock"></i>Contact support to change</p>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="firstName" class="pg-label"><i class="fas fa-user"></i>First Name</label>
+                    <input type="text" class="pg-input" id="firstName"
+                           value="{{ current_user.first_name or '' }}"
+                           placeholder="Enter first name" readonly
+                           autocomplete="given-name" maxlength="50">
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="lastName" class="pg-label"><i class="fas fa-user"></i>Last Name</label>
+                    <input type="text" class="pg-input" id="lastName"
+                           value="{{ current_user.last_name or '' }}"
+                           placeholder="Enter last name" readonly
+                           autocomplete="family-name" maxlength="50">
+                  </div>
+
+                  <div class="col-12">
+                    <label for="mobileNumber" class="pg-label"><i class="fas fa-mobile-alt"></i>Mobile Number</label>
+                    <input type="tel" class="pg-input" id="mobileNumber"
+                           value="{{ current_user.mobile_number or '' }}"
+                           placeholder="e.g. +91 98765 43210" readonly
+                           autocomplete="tel" maxlength="20">
+                    <p class="pg-input-hint"><i class="fas fa-info-circle"></i>Include country code</p>
+                  </div>
+
+                  <div class="col-12">
+                    <label for="bio" class="pg-label"><i class="fas fa-align-left"></i>Bio</label>
+                    <textarea class="pg-input" id="bio" rows="3"
+                              maxlength="150" placeholder="Tell us something about you..." readonly
+                              autocomplete="off">{{ current_user.bio or '' }}</textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                      <p class="pg-input-hint"><i class="fas fa-info-circle"></i>Max 150 characters</p>
+                      <span id="bioCharCount" class="pg-char-counter">{{ (current_user.bio or '')|length }}/150</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Form Actions (hidden until edit mode) -->
+                <div id="profileFormActions" class="pg-actions d-none">
+                  <button type="button" class="btn-pg-cancel" id="cancelEditBtn">
+                    <i class="fas fa-times me-1"></i>Cancel
+                  </button>
+                  <button type="submit" class="btn-pg-save" disabled id="submitBtn">
+                    <span class="spinner-border spinner-border-sm d-none me-1"></span>
+                    <i class="fas fa-save me-1"></i>Save Changes
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="pg-danger">
+        <div>
+          <p class="pg-danger-title"><i class="fas fa-exclamation-triangle me-2"></i>Danger Zone</p>
+          <p class="pg-danger-text">Permanently delete your account and all associated data. This cannot be undone.</p>
+        </div>
+        <button type="button" class="btn-pg-danger"
+                data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+          <i class="fas fa-trash-alt me-1"></i>Delete Account
+        </button>
+      </div>
+
+    </div><!-- /col-lg-9 -->
+  </div><!-- /row -->
+</div><!-- /container -->
+</div><!-- /pg-wrapper -->
+
+
+<!-- ══════════════ Delete Modal ══════════════ -->
+<div class="modal fade pg-modal" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Delete Account</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#374151; font-size:.9rem; margin-bottom:1rem;">
+          All your notes and data will be <strong>permanently erased</strong>. This action cannot be reversed.
+        </p>
+        <div class="pg-code-box">
+          <span style="font-size:.8rem;color:#6b7280;font-family:'DM Mono',monospace;">Type your username to confirm:</span><br>
+          <code id="confirmUsernameDisplay" data-username="{{ current_user.username }}">{{ current_user.username }}</code>
+        </div>
+        <label for="confirmUsername" class="pg-label" style="font-size:.7rem;">Username</label>
+        <input type="text" class="pg-input" id="confirmUsername"
+               placeholder="Type your username" autocomplete="off">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-pg-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-pg-danger" id="confirmDeleteAccount" disabled>
+          <span class="spinner-border spinner-border-sm d-none me-1"></span>
+          <i class="fas fa-trash-alt me-1"></i>Delete Forever
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ Toasts ══════════════ -->
+<div class="pg-toast-wrap">
+  <div class="toast pg-toast pg-toast-success" id="successToast" role="alert">
+    <div class="pg-toast-body">
+      <i class="fas fa-check-circle fa-lg"></i>
+      <span id="successMessage"></span>
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  <div class="toast pg-toast pg-toast-error" id="errorToast" role="alert">
+    <div class="pg-toast-body">
+      <i class="fas fa-exclamation-circle fa-lg"></i>
+      <span id="errorMessage"></span>
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  <div class="toast pg-toast pg-toast-info" id="infoToast" role="alert">
+    <div class="pg-toast-body">
+      <i class="fas fa-info-circle fa-lg"></i>
+      <span id="infoMessage"></span>
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='profile.js') }}"></script>
+{% endblock %}

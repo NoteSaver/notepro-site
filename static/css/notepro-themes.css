@@ -1,0 +1,354 @@
+/**
+ * ===================================================================
+ * 🎨 NOTEPRO COLOR THEMES - EASY CUSTOMIZATION
+ * Add any of these themes to override default colors
+ * ===================================================================
+ */
+
+/* ==================== THEME 1: MODERN BLUE (DEFAULT) ==================== */
+
+:root {
+    --primary-color: #2563eb;
+    --primary-dark: #1e40af;
+    --primary-light: #3b82f6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #0ea5e9;
+}
+
+/* ==================== THEME 2: PROFESSIONAL PURPLE ==================== */
+
+body.theme-purple {
+    --primary-color: #7c3aed;
+    --primary-dark: #6d28d9;
+    --primary-light: #a78bfa;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+}
+
+/* ==================== THEME 3: ELEGANT TEAL ==================== */
+
+body.theme-teal {
+    --primary-color: #14b8a6;
+    --primary-dark: #0d9488;
+    --primary-light: #2dd4bf;
+    --success-color: #059669;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 4: VIBRANT PINK ==================== */
+
+body.theme-pink {
+    --primary-color: #ec4899;
+    --primary-dark: #be185d;
+    --primary-light: #f472b6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 5: DARK ORANGE ==================== */
+
+body.theme-orange {
+    --primary-color: #f97316;
+    --primary-dark: #ea580c;
+    --primary-light: #fb923c;
+    --success-color: #10b981;
+    --warning-color: #eab308;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 6: COOL CYAN ==================== */
+
+body.theme-cyan {
+    --primary-color: #06b6d4;
+    --primary-dark: #0891b2;
+    --primary-light: #22d3ee;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 7: EMERALD GREEN ==================== */
+
+body.theme-emerald {
+    --primary-color: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #6ee7b7;
+    --success-color: #14b8a6;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 8: INDIGO PROFESSIONAL ==================== */
+
+body.theme-indigo {
+    --primary-color: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #818cf8;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== THEME 9: ROSE ELEGANT ==================== */
+
+body.theme-rose {
+    --primary-color: #f43f5e;
+    --primary-dark: #e11d48;
+    --primary-light: #fb7185;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #dc2626;
+}
+
+/* ==================== THEME 10: SLATE MINIMAL ==================== */
+
+body.theme-slate {
+    --primary-color: #475569;
+    --primary-dark: #334155;
+    --primary-light: #64748b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+}
+
+/* ==================== HOW TO USE THEMES ==================== */
+
+/*
+ * METHOD 1: Add class to body in HTML
+ * =====================================
+ * <body class="theme-purple">
+ * 
+ * METHOD 2: Toggle with JavaScript
+ * ==================================
+ * document.body.classList.add('theme-teal');
+ * document.body.classList.remove('theme-purple');
+ * 
+ * METHOD 3: Toggle in HTML
+ * ==================================
+ * <button onclick="setTheme('theme-pink')">Pink Theme</button>
+ * 
+ * <script>
+ *   function setTheme(themeName) {
+ *     // Remove all theme classes
+ *     document.body.classList.forEach(cls => {
+ *       if (cls.startsWith('theme-')) {
+ *         document.body.classList.remove(cls);
+ *       }
+ *     });
+ *     // Add selected theme
+ *     document.body.classList.add(themeName);
+ *     // Save to localStorage
+ *     localStorage.setItem('selectedTheme', themeName);
+ *   }
+ * </script>
+ */
+
+/* ==================== CUSTOM THEME TEMPLATE ==================== */
+
+/*
+ * Create your own theme by copying and modifying:
+ * 
+ * body.theme-mycolor {
+ *     --primary-color: #your-hex-code;
+ *     --primary-dark: #your-darker-hex;
+ *     --primary-light: #your-lighter-hex;
+ *     --success-color: #your-success-hex;
+ *     --warning-color: #your-warning-hex;
+ *     --danger-color: #your-danger-hex;
+ * }
+ * 
+ * Then use: <body class="theme-mycolor">
+ */
+
+/* ==================== ADVANCED: CUSTOM STYLING PER THEME ==================== */
+
+/* Example: Different button styles per theme */
+
+body.theme-purple .toolbar-btn {
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+body.theme-teal .toolbar-btn {
+    border: 1px solid rgba(20, 184, 166, 0.2);
+}
+
+body.theme-pink .toolbar-btn {
+    border: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+/* Example: Different page shadows per theme */
+
+body.theme-purple .editor-page {
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.15);
+}
+
+body.theme-teal .editor-page {
+    box-shadow: 0 10px 30px rgba(20, 184, 166, 0.15);
+}
+
+body.theme-pink .editor-page {
+    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.15);
+}
+
+/* ==================== THEME SWITCHER UI ==================== */
+
+.theme-switcher {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.theme-button {
+    width: 40px;
+    height: 40px;
+    border: 3px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 200ms ease;
+    font-size: 0;
+}
+
+.theme-button:hover {
+    transform: scale(1.1);
+    border-color: #ccc;
+}
+
+.theme-button.active {
+    border-color: #000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Theme colors */
+.theme-button.blue { background: #2563eb; }
+.theme-button.purple { background: #7c3aed; }
+.theme-button.teal { background: #14b8a6; }
+.theme-button.pink { background: #ec4899; }
+.theme-button.orange { background: #f97316; }
+.theme-button.cyan { background: #06b6d4; }
+.theme-button.green { background: #10b981; }
+.theme-button.indigo { background: #4f46e5; }
+.theme-button.rose { background: #f43f5e; }
+.theme-button.slate { background: #475569; }
+
+/* ==================== COMPLETE THEME SELECTOR EXAMPLE ==================== */
+
+/*
+ * Add this to your HTML to display theme selector:
+ * 
+ * <div class="theme-switcher">
+ *     <button class="theme-button blue active" onclick="setTheme('')" title="Blue"></button>
+ *     <button class="theme-button purple" onclick="setTheme('theme-purple')" title="Purple"></button>
+ *     <button class="theme-button teal" onclick="setTheme('theme-teal')" title="Teal"></button>
+ *     <button class="theme-button pink" onclick="setTheme('theme-pink')" title="Pink"></button>
+ *     <button class="theme-button orange" onclick="setTheme('theme-orange')" title="Orange"></button>
+ *     <button class="theme-button cyan" onclick="setTheme('theme-cyan')" title="Cyan"></button>
+ *     <button class="theme-button green" onclick="setTheme('theme-emerald')" title="Green"></button>
+ *     <button class="theme-button indigo" onclick="setTheme('theme-indigo')" title="Indigo"></button>
+ *     <button class="theme-button rose" onclick="setTheme('theme-rose')" title="Rose"></button>
+ *     <button class="theme-button slate" onclick="setTheme('theme-slate')" title="Slate"></button>
+ * </div>
+ * 
+ * <script>
+ *   function setTheme(themeName) {
+ *     // Remove all theme classes
+ *     Array.from(document.body.classList).forEach(cls => {
+ *       if (cls.startsWith('theme-')) {
+ *         document.body.classList.remove(cls);
+ *       }
+ *     });
+ *     
+ *     // Add new theme if specified
+ *     if (themeName) {
+ *       document.body.classList.add(themeName);
+ *     }
+ *     
+ *     // Save preference
+ *     localStorage.setItem('notepro-theme', themeName);
+ *     
+ *     // Update button states
+ *     document.querySelectorAll('.theme-button').forEach(btn => {
+ *       btn.classList.remove('active');
+ *     });
+ *     event.target.classList.add('active');
+ *   }
+ *   
+ *   // Load saved theme on startup
+ *   window.addEventListener('load', () => {
+ *     const savedTheme = localStorage.getItem('notepro-theme');
+ *     if (savedTheme) {
+ *       setTheme(savedTheme);
+ *     }
+ *   });
+ * </script>
+ */
+
+/* ==================== COLOR PALETTE REFERENCE ==================== */
+
+/*
+ * HEX CODES USED:
+ * 
+ * BLUES:
+ *   - #2563eb (Primary Blue)
+ *   - #1e40af (Dark Blue)
+ *   - #3b82f6 (Light Blue)
+ * 
+ * PURPLES:
+ *   - #7c3aed (Purple)
+ *   - #6d28d9 (Dark Purple)
+ *   - #a78bfa (Light Purple)
+ * 
+ * TEALS:
+ *   - #14b8a6 (Teal)
+ *   - #0d9488 (Dark Teal)
+ *   - #2dd4bf (Light Teal)
+ * 
+ * PINKS:
+ *   - #ec4899 (Pink)
+ *   - #be185d (Dark Pink)
+ *   - #f472b6 (Light Pink)
+ * 
+ * ORANGES:
+ *   - #f97316 (Orange)
+ *   - #ea580c (Dark Orange)
+ *   - #fb923c (Light Orange)
+ * 
+ * CYANS:
+ *   - #06b6d4 (Cyan)
+ *   - #0891b2 (Dark Cyan)
+ *   - #22d3ee (Light Cyan)
+ * 
+ * GREENS:
+ *   - #10b981 (Green)
+ *   - #059669 (Dark Green)
+ *   - #6ee7b7 (Light Green)
+ * 
+ * INDIGOS:
+ *   - #4f46e5 (Indigo)
+ *   - #4338ca (Dark Indigo)
+ *   - #818cf8 (Light Indigo)
+ * 
+ * ROSES:
+ *   - #f43f5e (Rose)
+ *   - #e11d48 (Dark Rose)
+ *   - #fb7185 (Light Rose)
+ * 
+ * SLATES:
+ *   - #475569 (Slate)
+ *   - #334155 (Dark Slate)
+ *   - #64748b (Light Slate)
+ * 
+ * STATUS COLORS (CONSISTENT):
+ *   - Success: #10b981 (Green)
+ *   - Warning: #f59e0b (Amber)
+ *   - Danger: #ef4444 (Red)
+ *   - Info: #0ea5e9 (Sky Blue)
+ */

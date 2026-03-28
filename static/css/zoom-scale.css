@@ -1,0 +1,21 @@
+/*
+ * Zoom Scale CSS - Font Size Scaling Version
+ *
+ * APPROACH: html { font-size: 87.5% } sets base from 16px → 14px.
+ * All rem-based values in base.html, dashboard.html, index.html, premium.html
+ * automatically scale down proportionally — no layout breakage, no Firefox hacks,
+ * no modal/scroll positioning bugs that css zoom/transform caused.
+ *
+ * To make site bigger: increase % (e.g. 93.75% = ~15px)
+ * To make site smaller: decrease % (e.g. 81.25% = ~13px)
+ */
+
+html {
+    font-size: 87.5%; /* 16px × 0.875 = 14px base */
+    scroll-behavior: smooth;
+}
+
+/* Prevent horizontal overflow — background/height managed in base.html body styles */
+body {
+    overflow-x: hidden;
+}

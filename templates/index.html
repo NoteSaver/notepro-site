@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Index-specific CSS variables only.
+       Core variables (--primary, --secondary, --accent, etc.) are defined in base.html :root */
+    :root {
+        --gray-400: #9ca3af;  /* Not in base.html */
+        --premium: #f59e0b;   /* Alias for --accent, index-specific semantic name */
+    }
+
+    /* CRITICAL: Remove all default spacing */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Full width sections with no gaps */
+    .full-width-section {
+    width: 100%;
+    max-width: 100%;
+}
+
+
+    /* HERO SECTION */
+    .hero {
+        margin-top: 0;
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .hero::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        left: -5%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite reverse;
+    }
+
+    .hero-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 3rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5rem;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+    }
+
+    .hero-content h1 {
+        font-size: 3.75rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        animation: slideInLeft 0.8s ease-out;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .hero-content h1 span {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-content p {
+        font-size: 1.25rem;
+        color: var(--gray-600);
+        margin-bottom: 2.5rem;
+        max-width: 550px;
+        animation: slideInLeft 0.8s ease-out 0.2s both;
+        line-height: 1.8;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1.5rem;
+        animation: slideInLeft 0.8s ease-out 0.4s both;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-block;
+    }
+
+    .btn-primary-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary-hero:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        color: white;
+    }
+
+    .btn-outline-hero {
+        border: 2px solid var(--dark);
+        color: var(--dark);
+        background: transparent;
+    }
+
+    .btn-outline-hero:hover {
+        background: var(--dark);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .hero-visual {
+        animation: slideInRight 0.8s ease-out 0.3s both;
+        perspective: 1000px;
+    }
+
+    .hero-visual img,
+    .hero-visual svg {
+        width: 100%;
+        max-height: 550px;
+        object-fit: contain;
+        filter: drop-shadow(0 20px 40px rgba(37, 99, 235, 0.15));
+        animation: float 6s ease-in-out infinite;
+    }
+
+    /* FEATURES SECTION */
+    .features {
+        padding: 6rem 0;
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .features::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    }
+
+    .features-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 3rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 5rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .section-header h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .section-header p {
+        font-size: 1.15rem;
+        color: var(--gray-600);
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2.5rem;
+        width: 100%;
+    }
+
+    .feature-card {
+        padding: 2.5rem;
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: left;
+    }
+
+    .feature-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 25px 50px rgba(37, 99, 235, 0.12);
+        border-color: var(--primary);
+    }
+
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        font-size: 2rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .icon-blue {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary);
+    }
+
+    .icon-green {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .icon-orange {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--accent);
+    }
+
+    .feature-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    .feature-card p {
+        color: var(--gray-600);
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 1.75rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-free {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-premium {
+        background: rgba(245, 158, 11, 0.15);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* PREMIUM SECTION */
+    .premium-section {
+        padding: 6rem 0;
+        background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 12s ease-in-out infinite;
+    }
+
+    .premium-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 3rem;
+    }
+
+    .premium-header {
+        text-align: center;
+        margin-bottom: 4.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .premium-header h2 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .premium-header .highlight {
+        background: linear-gradient(135deg, var(--accent) 0%, #fbbf24 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .premium-header p {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .premium-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2.5rem;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+    }
+
+    .premium-card {
+        padding: 2.5rem;
+        border-radius: 1.25rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(245, 158, 11, 0.3);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-10px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent);
+        box-shadow: 0 25px 50px rgba(245, 158, 11, 0.2);
+    }
+
+    .premium-card .feature-icon {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent);
+    }
+
+    .premium-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+
+    .premium-card p {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 1rem;
+        margin-bottom: 1.75rem;
+        line-height: 1.7;
+    }
+
+    /* CTA SECTION */
+    .cta-section {
+        padding: 6rem 0 8rem;
+        text-align: center;
+        background: linear-gradient(135deg, white 0%, var(--gray-50) 100%);
+        border-top: 1px solid var(--gray-200);
+        margin-bottom: 0;
+        flex: 1;
+    }
+
+    .cta-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 3rem;
+    }
+
+    .cta-content h2 {
+        font-size: 2.75rem;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .cta-content p {
+        font-size: 1.15rem;
+        color: var(--gray-600);
+        margin-bottom: 2.5rem;
+        line-height: 1.8;
+    }
+
+    /* ANIMATIONS */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* DARK MODE */
+    body.dark-theme {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    body.dark-theme .hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    body.dark-theme .hero::before {
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+    }
+
+    body.dark-theme .hero::after {
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+    }
+
+    body.dark-theme .hero-content h1 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .hero-content p {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .btn-outline-hero {
+        border-color: #f1f5f9;
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .btn-outline-hero:hover {
+        background: #f1f5f9;
+        color: var(--dark);
+    }
+
+    body.dark-theme .features {
+        background: #1e293b;
+    }
+
+    body.dark-theme .features::before {
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent);
+    }
+
+    body.dark-theme .section-header h2 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .section-header p {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .feature-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .feature-card:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary);
+    }
+
+    body.dark-theme .feature-card h3 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .feature-card p {
+        color: #cbd5e1;
+    }
+
+    body.dark-theme .icon-blue {
+        background: rgba(37, 99, 235, 0.2);
+    }
+
+    body.dark-theme .icon-green {
+        background: rgba(16, 185, 129, 0.2);
+    }
+
+    body.dark-theme .icon-orange {
+        background: rgba(245, 158, 11, 0.2);
+    }
+
+    body.dark-theme .badge-free {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    body.dark-theme .badge-premium {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fcd34d;
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    body.dark-theme .cta-section {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .cta-content h2 {
+        color: #f1f5f9;
+    }
+
+    body.dark-theme .cta-content p {
+        color: #cbd5e1;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+        .hero-container,
+        .features-wrapper,
+        .premium-wrapper,
+        .cta-wrapper {
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .features-grid,
+        .premium-grid {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+        }
+
+        .hero-cta {
+            flex-direction: column;
+        }
+
+        .btn-hero {
+            width: 100%;
+            text-align: center;
+        }
+
+        .section-header h2,
+        .premium-header h2,
+        .cta-content h2 {
+            font-size: 2.25rem;
+        }
+
+        .features-wrapper,
+        .premium-wrapper,
+        .cta-wrapper {
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        .features-grid,
+        .premium-grid {
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        .feature-card,
+        .premium-card {
+            padding: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .section-header h2,
+        .premium-header h2 {
+            font-size: 1.85rem;
+        }
+
+        .cta-content h2 {
+            font-size: 1.75rem;
+        }
+
+        .hero-container,
+        .features-wrapper,
+        .premium-wrapper,
+        .cta-wrapper {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+</style>
+
+<!-- HERO SECTION -->
+<section class="hero full-width-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>Your Digital Notebook<br><span>Reimagined for Professionals</span></h1>
+            <p>Create, organize, and access your notes from anywhere. Built for simplicity with enterprise-level productivity and security.</p>
+            <div class="hero-cta">
+                <a href="{{ url_for('register') }}" class="btn-hero btn-primary-hero" data-no-loader>Get Started Free →</a>
+                <a href="{{ url_for('login') }}" class="btn-hero btn-outline-hero" data-no-loader>Sign In</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 500px;">
+                <defs>
+                    <linearGradient id="notebookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <ellipse cx="200" cy="480" rx="150" ry="15" fill="rgba(37, 99, 235, 0.15)" />
+                <rect x="50" y="40" width="300" height="400" rx="20" fill="url(#notebookGrad)" filter="drop-shadow(0 20px 40px rgba(37, 99, 235, 0.2))" />
+                <rect x="70" y="60" width="260" height="360" rx="15" fill="white" />
+                <rect x="70" y="60" width="260" height="50" rx="15" fill="#f8fafc" />
+                <circle cx="90" cy="85" r="6" fill="#e5e7eb" />
+                <circle cx="110" cy="85" r="6" fill="#e5e7eb" />
+                <circle cx="130" cy="85" r="6" fill="#e5e7eb" />
+                <line x1="90" y1="130" x2="310" y2="130" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="150" x2="310" y2="150" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="170" x2="280" y2="170" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="210" x2="310" y2="210" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="230" x2="310" y2="230" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="250" x2="300" y2="250" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="290" x2="310" y2="290" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="310" x2="310" y2="310" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <line x1="90" y1="330" x2="270" y2="330" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" />
+                <rect x="70" y="360" width="260" height="55" rx="10" fill="rgba(37, 99, 235, 0.05)" />
+                <circle cx="95" cy="385" r="5" fill="#f59e0b" />
+                <text x="110" y="390" font-family="Poppins" font-size="12" fill="#9ca3af">Secured & Encrypted</text>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="features full-width-section" id="features">
+    <div class="features-wrapper">
+        <div class="section-header">
+            <h2>Why Choose <span style="background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">NoteSaver Pro?</span></h2>
+            <p>Next-level features tailored for students, creatives, and professionals alike. Discover the difference.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 0.1s both;">
+                <div class="feature-icon icon-blue"><i class="fas fa-pen-fancy"></i></div>
+                <h3>Rich Text Editor</h3>
+                <p>Easily format your notes with our user-friendly rich text editor, supporting markdown and code blocks.</p>
+                <span class="badge badge-free">Free Tier</span>
+            </div>
+
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 0.2s both;">
+                <div class="feature-icon icon-green"><i class="fas fa-shield-alt"></i></div>
+                <h3>Secure Cloud Storage</h3>
+                <p>Your data is encrypted end-to-end and stored safely with zero-knowledge architecture.</p>
+                <span class="badge badge-free">Free Tier</span>
+            </div>
+
+            <div class="feature-card" style="animation: fadeInUp 0.8s ease-out 0.3s both;">
+                <div class="feature-icon icon-orange"><i class="fas fa-bolt"></i></div>
+                <h3>Real-time Sync</h3>
+                <p>Stay updated across all your devices—desktop, web, and mobile—automatically and instantly.</p>
+                <span class="badge badge-free">Free Tier</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PREMIUM SECTION -->
+<section class="premium-section full-width-section" id="premium">
+    <div class="premium-wrapper">
+        <div class="premium-header">
+            <h2>Unlock <span class="highlight">Premium Power</span></h2>
+            <p>Advanced features for power users and enterprises</p>
+        </div>
+
+        <div class="premium-grid">
+            <div class="premium-card" style="animation: fadeInUp 0.8s ease-out 0.1s both;">
+                <div class="feature-icon"><i class="fas fa-download"></i></div>
+                <h3>Export as PDF/DOCX</h3>
+                <p>Download and share notes instantly in professional, formatted PDF and DOCX formats.</p>
+                <span class="badge badge-premium">Premium</span>
+            </div>
+
+            <div class="premium-card" style="animation: fadeInUp 0.8s ease-out 0.2s both;">
+                <div class="feature-icon"><i class="fas fa-tags"></i></div>
+                <h3>Advanced Organization</h3>
+                <p>Tag, organize, and quickly search notes with nested folders and favorites lists.</p>
+                <span class="badge badge-premium">Premium</span>
+            </div>
+
+            <div class="premium-card" style="animation: fadeInUp 0.8s ease-out 0.3s both;">
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <h3>Private Lock Mode</h3>
+                <p>Lock sensitive notes with a private pin or biometric authentication for total privacy.</p>
+                <span class="badge badge-premium">Premium</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section full-width-section" id="pricing">
+    <div class="cta-wrapper">
+        <div class="cta-content">
+            <h2>Ready to Transform Your Note-Taking?</h2>
+            <p>Join thousands of professionals who trust NoteSaver Pro for their digital workspace. Start free today, no credit card required.</p>
+            <a href="{{ url_for('register') }}" class="btn-hero btn-primary-hero" style="display: inline-block; margin-top: 1rem;" data-no-loader>Start Your Free Trial →</a>
+            <a href="{{ url_for('reviews') }}" class="btn-hero btn-outline-hero" style="display: inline-block; margin-top: 1rem;" data-no-loader>
+                <i class="fas fa-star me-1"></i> Read Reviews
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

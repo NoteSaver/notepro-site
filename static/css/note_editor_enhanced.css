@@ -1,0 +1,602 @@
+/* ================================================================== */
+/* 🔥 MS WORD-STYLE EDITOR - PERFECT FIXED LAYOUT */
+/* ================================================================== */
+/* 
+   ✅ STEP 1: Fixed paper sizes (NO scrolling inside pages)
+   ✅ Exact height calculations
+   ✅ Cross-browser compatibility
+   ✅ MS Word-like appearance
+*/
+
+/* ==================== BASE PAGE LAYOUT ==================== */
+
+.editor-page {
+    /* STEP 1A: Exact fixed dimensions */
+    width: 210mm;
+    height: 297mm;
+    
+    /* Layout */
+    margin: 0 auto 25px;
+    box-sizing: border-box;
+    position: relative;
+    
+    /* Visual */
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    
+    /* CRITICAL: No overflow allowed */
+    overflow: hidden;
+    
+    /* Performance */
+    contain: layout style paint;
+    transition: box-shadow 0.3s ease;
+}
+
+.editor-page:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* ==================== CONTENT AREA (NO SCROLL) ==================== */
+
+.page-content {
+    /* STEP 1B: Fixed height with padding */
+    height: 100%;
+    padding: 2.54cm;
+    box-sizing: border-box;
+    
+    /* CRITICAL: Absolutely NO scrolling */
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    
+    /* Text settings */
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #000;
+    
+    /* Word wrapping */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    /* Editor */
+    outline: none;
+    background-color: white;
+    
+    /* Performance */
+    contain: layout style;
+}
+
+/* Remove ALL scrollbar traces */
+.page-content::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.page-content {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    scrollbar-width: none !important; /* Firefox */
+}
+
+/* Focus state */
+.page-content:focus {
+    outline: 2px solid rgba(13, 110, 253, 0.25);
+    outline-offset: -2px;
+}
+
+.page-content:focus-visible {
+    outline: 2px solid rgba(13, 110, 253, 0.5);
+}
+
+/* ==================== PAPER SIZE VARIANTS ==================== */
+/* All sizes are EXACT measurements */
+
+/* A4: 210mm × 297mm (Default) */
+.pages-container.paper-a4 .editor-page {
+    width: 210mm;
+    height: 297mm;
+}
+
+/* A3: 297mm × 420mm */
+.pages-container.paper-a3 .editor-page {
+    width: 297mm;
+    height: 420mm;
+}
+
+/* A5: 148mm × 210mm */
+.pages-container.paper-a5 .editor-page {
+    width: 148mm;
+    height: 210mm;
+}
+
+/* Letter: 8.5" × 11" (US Standard) */
+.pages-container.paper-letter .editor-page {
+    width: 8.5in;
+    height: 11in;
+}
+
+/* Legal: 8.5" × 14" (US Legal) */
+.pages-container.paper-legal .editor-page {
+    width: 8.5in;
+    height: 14in;
+}
+
+/* B4 JIS: 257mm × 364mm */
+.pages-container.paper-b4jis .editor-page {
+    width: 257mm;
+    height: 364mm;
+}
+
+/* B5 JIS: 182mm × 257mm */
+.pages-container.paper-b5jis .editor-page {
+    width: 182mm;
+    height: 257mm;
+}
+
+/* Executive: 7.25" × 10.5" */
+.pages-container.paper-executive .editor-page {
+    width: 7.25in;
+    height: 10.5in;
+}
+
+/* Tabloid/Ledger: 11" × 17" */
+.pages-container.paper-tabloid .editor-page,
+.pages-container.paper-11x17 .editor-page {
+    width: 11in;
+    height: 17in;
+}
+
+/* Envelope C5: 162mm × 229mm */
+.pages-container.paper-envc5 .editor-page {
+    width: 162mm;
+    height: 229mm;
+    padding: 1.5cm;
+}
+
+/* Envelope C4: 229mm × 324mm */
+.pages-container.paper-envc4 .editor-page {
+    width: 229mm;
+    height: 324mm;
+    padding: 1.5cm;
+}
+
+/* Envelope DL: 110mm × 220mm */
+.pages-container.paper-envdl .editor-page {
+    width: 110mm;
+    height: 220mm;
+    padding: 1cm;
+}
+
+/* Envelope #10: 4.125" × 9.5" */
+.pages-container.paper-env10 .editor-page {
+    width: 4.125in;
+    height: 9.5in;
+    padding: 0.5in;
+}
+
+/* Envelope Monarch: 3.875" × 7.5" */
+.pages-container.paper-envmon .editor-page {
+    width: 3.875in;
+    height: 7.5in;
+    padding: 0.5in;
+}
+
+/* ==================== CONTENT PROTECTION ==================== */
+
+/* Ensure all child elements respect boundaries */
+.page-content * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Prevent margin collapse */
+.page-content > *:first-child {
+    margin-top: 0;
+}
+
+.page-content > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Paragraphs and text blocks */
+p, div, blockquote, li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Tables */
+table {
+    table-layout: auto;
+    max-width: 100%;
+    border-collapse: collapse;
+}
+
+table td, table th {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 4px 8px;
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Code blocks */
+pre, code {
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
+    font-family: "Courier New", monospace;
+}
+
+/* ==================== PAGE INDICATORS ==================== */
+
+.page-number {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-size: 10pt;
+    color: #666;
+    font-family: "Times New Roman", serif;
+    pointer-events: none;
+    user-select: none;
+    z-index: 10;
+}
+
+.page-indicator {
+    position: absolute;
+    top: -35px;
+    left: 15px;
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+    user-select: none;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+    z-index: 10;
+}
+
+/* ==================== PAGES CONTAINER ==================== */
+
+.pages-container {
+    padding: 50px 20px;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+    min-height: 100vh;
+    position: relative;
+}
+
+/* ==================== TEXT FORMATTING ==================== */
+
+/* Headings */
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.page-content h1 { font-size: 2em; }
+.page-content h2 { font-size: 1.5em; }
+.page-content h3 { font-size: 1.17em; }
+.page-content h4 { font-size: 1em; }
+.page-content h5 { font-size: 0.83em; }
+.page-content h6 { font-size: 0.67em; }
+
+/* Lists */
+.page-content ul,
+.page-content ol {
+    padding-left: 2em;
+    margin: 0.5em 0;
+}
+
+.page-content li {
+    margin: 0.25em 0;
+    line-height: 1.6;
+}
+
+/* Blockquotes */
+.page-content blockquote {
+    margin: 1em 0;
+    padding-left: 1.5em;
+    border-left: 4px solid #ddd;
+    color: #555;
+    font-style: italic;
+}
+
+/* Horizontal rules */
+.page-content hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1.5em 0;
+}
+
+/* ==================== SELECTION STYLING ==================== */
+
+.page-content ::selection {
+    background-color: rgba(13, 110, 253, 0.25);
+    color: inherit;
+}
+
+.page-content ::-moz-selection {
+    background-color: rgba(13, 110, 253, 0.25);
+    color: inherit;
+}
+
+/* ==================== DARK MODE SUPPORT ==================== */
+
+.dark-mode .pages-container {
+    background: linear-gradient(to bottom, #1a1a1a 0%, #0d0d0d 100%);
+}
+
+.dark-mode .editor-page {
+    background-color: #2d2d2d;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .page-content {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dark-mode .page-number {
+    color: #aaa;
+}
+
+.dark-mode .page-indicator {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+.dark-mode .page-content ::selection {
+    background-color: rgba(59, 130, 246, 0.4);
+}
+
+.dark-mode .page-content blockquote {
+    border-left-color: #555;
+    color: #aaa;
+}
+
+.dark-mode .page-content hr {
+    border-top-color: #444;
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+    .pages-container {
+        background: white;
+        padding: 0;
+    }
+    
+    .editor-page {
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+        border-radius: 0;
+    }
+    
+    .page-indicator,
+    .page-number {
+        display: none;
+    }
+    
+    .page-content {
+        overflow: visible;
+        height: auto;
+    }
+    
+    /* Ensure content doesn't break across pages */
+    .page-content h1,
+    .page-content h2,
+    .page-content h3,
+    .page-content h4,
+    .page-content h5,
+    .page-content h6 {
+        page-break-after: avoid;
+    }
+    
+    .page-content p,
+    .page-content blockquote {
+        page-break-inside: avoid;
+    }
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+@media (max-width: 1200px) {
+    .pages-container {
+        padding: 40px 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pages-container {
+        padding: 30px 10px;
+    }
+    
+    .editor-page {
+        transform: scale(0.85);
+        transform-origin: top center;
+        margin-bottom: 20px;
+    }
+    
+    .page-indicator {
+        font-size: 10px;
+        padding: 4px 10px;
+        top: -30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .editor-page {
+        transform: scale(0.65);
+    }
+    
+    .page-content {
+        padding: 1.5cm;
+    }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .editor-page {
+        border: 2px solid #000;
+    }
+    
+    .page-content:focus {
+        outline: 3px solid #000;
+        outline-offset: -3px;
+    }
+    
+    .page-indicator {
+        background: #000;
+        border: 2px solid #fff;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .editor-page,
+    .page-indicator {
+        transition: none;
+    }
+}
+
+/* Screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ==================== ANIMATION STATES ==================== */
+
+.editor-page.transitioning {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.editor-page.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Smooth fade-in for new pages */
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.editor-page.newly-created {
+    animation: fadeInPage 0.3s ease-out;
+}
+
+/* ==================== PERFORMANCE OPTIMIZATIONS ==================== */
+
+.editor-page {
+    will-change: auto;
+    contain: layout style paint;
+}
+
+.page-content {
+    will-change: auto;
+    contain: layout style;
+}
+
+/* ==================== PAGE BREAK MARKER ==================== */
+
+.page-break-marker {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    page-break-after: always;
+    display: none; /* Hidden in editor, used for export */
+}
+
+@media print {
+    .page-break-marker {
+        display: block;
+    }
+}
+
+/* ==================== CURSOR & CARET ==================== */
+
+.page-content {
+    caret-color: #000;
+}
+
+.dark-mode .page-content {
+    caret-color: #fff;
+}
+
+/* ==================== PLACEHOLDER TEXT ==================== */
+
+.page-content:empty::before {
+    content: "Start typing your document here...";
+    color: #999;
+    font-style: italic;
+    pointer-events: none;
+}
+
+.dark-mode .page-content:empty::before {
+    color: #666;
+}
+
+/* ==================== WORD COUNT & STATUS BADGES ==================== */
+
+.word-count-badge,
+.page-count-badge {
+    position: fixed;
+    bottom: 20px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.word-count-badge {
+    right: 20px;
+}
+
+.page-count-badge {
+    right: 180px;
+}
+
+.dark-mode .word-count-badge,
+.dark-mode .page-count-badge {
+    background: rgba(255, 255, 255, 0.15);
+}

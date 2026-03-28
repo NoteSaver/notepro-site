@@ -1,0 +1,293 @@
+/* ==================== CONTENT LIMIT STYLES ====================
+   File: static/css/content-limit-styles.css
+   ============================================================== */
+
+/* Character Counter (Bottom Right Corner) */
+.character-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.character-counter.warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.character-counter.danger {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Content Limit Modal Overlay */
+.content-limit-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Modal Content */
+.content-limit-modal-content {
+    background: white;
+    border-radius: 15px;
+    max-width: 550px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    overflow: hidden;
+}
+
+/* Modal Header */
+.content-limit-modal-header {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.content-limit-modal-header i {
+    font-size: 36px;
+    color: #e17055;
+}
+
+.content-limit-modal-header h3 {
+    margin: 0;
+    color: #2d3436;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* Modal Body */
+.content-limit-modal-body {
+    padding: 30px;
+}
+
+/* Stats Container */
+.limit-stats-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.limit-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.limit-stat-row:last-child {
+    border-bottom: none;
+}
+
+.limit-stat-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.limit-stat-value {
+    font-weight: 700;
+    color: #212529;
+}
+
+.limit-stat-value.danger {
+    color: #dc3545;
+}
+
+.limit-stat-value.success {
+    color: #28a745;
+}
+
+/* Alert Box */
+.limit-alert {
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #721c24;
+}
+
+.limit-alert i {
+    font-size: 20px;
+}
+
+/* Suggestions Box */
+.limit-suggestions {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.limit-suggestions h4 {
+    margin: 0 0 15px 0;
+    color: #1976d2;
+    font-size: 18px;
+}
+
+.limit-suggestions ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #424242;
+    line-height: 1.8;
+}
+
+/* Modal Footer */
+.content-limit-modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Close Button */
+.limit-close-btn {
+    background: #6c757d;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.limit-close-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Toast Notification */
+.content-limit-toast {
+    position: fixed;
+    bottom: 80px;
+    right: 30px;
+    background: #dc3545;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+}
+
+.content-limit-toast i {
+    font-size: 20px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Dark Mode Support */
+.dark-mode .content-limit-modal-content {
+    background: #2c3e50;
+    color: #ecf0f1;
+}
+
+.dark-mode .limit-stats-container {
+    background: #34495e;
+}
+
+.dark-mode .limit-stat-row {
+    border-bottom-color: #4a5f7f;
+}
+
+.dark-mode .limit-stat-label {
+    color: #bdc3c7;
+}
+
+.dark-mode .limit-stat-value {
+    color: #ecf0f1;
+}
+
+.dark-mode .limit-suggestions {
+    background: #34495e;
+    border-left-color: #3498db;
+}
+
+.dark-mode .limit-suggestions h4 {
+    color: #3498db;
+}
+
+.dark-mode .limit-suggestions ul {
+    color: #bdc3c7;
+}

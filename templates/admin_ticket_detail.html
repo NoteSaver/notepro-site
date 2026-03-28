@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+{% block title %}Ticket {{ ticket.ticket_ref }} — Admin{% endblock %}
+{% block head %}
+<style>
+.td-wrap { max-width: 780px; margin: 2rem auto; padding: 0 1rem 4rem; }
+
+.td-card {
+    background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.05);
+    overflow: hidden; margin-bottom: 1.25rem;
+}
+.td-card-top {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: .75rem;
+}
+.td-card-top h5 {
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: .95rem; color: #0f172a; margin: 0;
+}
+.td-card-top h5 i { color: #2563eb; margin-right: .4rem; }
+.td-body { padding: 1.25rem 1.5rem; }
+
+.td-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: .85rem; margin-bottom: 1.25rem;
+}
+@media(max-width:480px){ .td-meta-grid { grid-template-columns: 1fr; } }
+
+.td-meta-item {}
+.td-meta-label {
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
+    color: #9ca3af; font-family: 'DM Mono', monospace; margin-bottom: .2rem;
+}
+.td-meta-value { font-size: .85rem; font-weight: 600; color: #0f172a; }
+
+/* Status badge */
+.td-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .25rem .7rem; border-radius: 50px;
+    font-size: .72rem; font-weight: 700; font-family: 'DM Mono', monospace;
+}
+.td-badge.open        { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.td-badge.in_progress { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.td-badge.resolved    { background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0; }
+.td-badge.closed      { background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+/* Message box */
+.td-message {
+    background: #f8fafc; border: 1px solid #e5e7eb;
+    border-radius: 10px; padding: 1rem 1.25rem;
+    font-size: .875rem; color: #374151; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word;
+}
+
+/* Existing reply box */
+.td-existing-reply {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 10px; padding: 1rem 1.25rem;
+    font-size: .875rem; color: #065f46; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word;
+}
+.td-existing-reply-meta {
+    font-size: .72rem; color: #6b7280; font-family: 'DM Mono', monospace;
+    margin-bottom: .5rem;
+}
+
+/* Reply form */
+.td-label {
+    font-size: .73rem; font-weight: 700; color: #374151;
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: .4rem; display: block;
+}
+.td-textarea {
+    width: 100%; border: 1.5px solid #e5e7eb; border-radius: 8px;
+    padding: .75rem 1rem; font-size: .875rem; color: #0f172a;
+    min-height: 130px; resize: vertical; outline: none;
+    transition: border-color .2s, box-shadow .2s; font-family: inherit;
+}
+.td-textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+
+.td-status-select {
+    border: 1.5px solid #e5e7eb; border-radius: 8px;
+    padding: .6rem .9rem; font-size: .85rem; color: #0f172a;
+    background: #fff; outline: none; cursor: pointer;
+    transition: border-color .2s;
+}
+.td-status-select:focus { border-color: #2563eb; }
+
+/* Buttons */
+.td-btn-send {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff; border: none; border-radius: 8px;
+    padding: .7rem 1.75rem; font-weight: 700; font-size: .875rem;
+    cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: 'Poppins', sans-serif;
+}
+.td-btn-send:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+.td-btn-send:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+.td-btn-send .spinner {
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .6s linear infinite; display: none;
+}
+.td-btn-send.loading .spinner { display: inline-block; }
+.td-btn-send.loading .send-ico { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.td-btn-back {
+    background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: .65rem 1.25rem;
+    font-weight: 600; font-size: .85rem; cursor: pointer;
+    text-decoration: none; transition: all .15s;
+    display: inline-flex; align-items: center; gap: .4rem;
+}
+.td-btn-back:hover { background: #e2e8f0; color: #0f172a; }
+
+.td-btn-delete {
+    background: #fef2f2; color: #ef4444; border: 1px solid #fecaca;
+    border-radius: 8px; padding: .65rem 1.25rem;
+    font-weight: 600; font-size: .85rem; cursor: pointer;
+    transition: all .15s; display: inline-flex; align-items: center; gap: .4rem;
+}
+.td-btn-delete:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+.td-alert {
+    border-radius: 8px; padding: .7rem 1rem;
+    font-size: .83rem; font-weight: 600; margin-bottom: 1rem;
+    display: none; align-items: center; gap: .5rem;
+}
+.td-alert.success { background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0; }
+.td-alert.error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.td-alert.show    { display: flex; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="td-wrap">
+
+    <nav style="font-size:.75rem; color:#9ca3af; margin-bottom:1.25rem;">
+        <a href="{{ url_for('dashboard') }}" style="color:#2563eb; text-decoration:none;">Dashboard</a>
+        <span style="margin:0 .4rem;">/</span>
+        <a href="{{ url_for('admin_support') }}" style="color:#2563eb; text-decoration:none;">Support Tickets</a>
+        <span style="margin:0 .4rem;">/</span>
+        <span>{{ ticket.ticket_ref }}</span>
+    </nav>
+
+    <!-- Ticket Info -->
+    <div class="td-card">
+        <div class="td-card-top">
+            <h5>
+                <i class="fas fa-ticket-alt"></i>
+                {{ ticket.ticket_ref }}
+            </h5>
+            <span class="td-badge {{ ticket.status }}" id="statusBadge">
+                {{ ticket.status.replace('_', ' ').title() }}
+            </span>
+        </div>
+        <div class="td-body">
+
+            <div class="td-meta-grid">
+                <div class="td-meta-item">
+                    <div class="td-meta-label">From</div>
+                    <div class="td-meta-value">{{ ticket.user.username }}</div>
+                    <div style="font-size:.75rem; color:#9ca3af;">{{ ticket.user.email }}</div>
+                </div>
+                <div class="td-meta-item">
+                    <div class="td-meta-label">Category</div>
+                    <div class="td-meta-value" style="text-transform:capitalize;">{{ ticket.category }}</div>
+                </div>
+                <div class="td-meta-item">
+                    <div class="td-meta-label">Submitted</div>
+                    <div class="td-meta-value" style="font-size:.8rem;">{{ ticket.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                </div>
+                {% if ticket.admin_reply_at %}
+                <div class="td-meta-item">
+                    <div class="td-meta-label">Last Replied</div>
+                    <div class="td-meta-value" style="font-size:.8rem; color:#10b981;">{{ ticket.admin_reply_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom:.5rem;">
+                <div class="td-meta-label" style="margin-bottom:.4rem;">Subject</div>
+                <div style="font-size:.95rem; font-weight:700; color:#0f172a;">{{ ticket.subject }}</div>
+            </div>
+
+            <div style="margin-top:1rem;">
+                <div class="td-meta-label" style="margin-bottom:.4rem;">User's Message</div>
+                <div class="td-message">{{ ticket.message }}</div>
+            </div>
+
+            {% if ticket.admin_reply %}
+            <div style="margin-top:1rem;">
+                <div class="td-meta-label" style="margin-bottom:.4rem; color:#10b981;">
+                    <i class="fas fa-check-circle me-1"></i>Your Previous Reply
+                </div>
+                <div class="td-existing-reply-meta">
+                    Replied by {{ ticket.replied_by }} · {{ ticket.admin_reply_at.strftime('%d %b %Y, %I:%M %p') }}
+                </div>
+                <div class="td-existing-reply">{{ ticket.admin_reply }}</div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Reply Form -->
+    <div class="td-card">
+        <div class="td-card-top">
+            <h5><i class="fas fa-reply"></i>
+                {% if ticket.admin_reply %}Update Reply{% else %}Send Reply{% endif %}
+            </h5>
+        </div>
+        <div class="td-body">
+
+            <div id="replyAlert" class="td-alert"></div>
+
+            <div style="margin-bottom:1rem;">
+                <label class="td-label">
+                    Reply to <span style="color:#2563eb;">{{ ticket.user.email }}</span>
+                </label>
+                <textarea class="td-textarea" id="replyText"
+                          placeholder="Write your reply here. This will be sent directly to the user's email.">{% if ticket.admin_reply %}{{ ticket.admin_reply }}{% endif %}</textarea>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                <div style="display:flex; align-items:center; gap:.75rem;">
+                    <label class="td-label" style="margin:0; white-space:nowrap;">Set Status:</label>
+                    <select class="td-status-select" id="statusSelect">
+                        <option value="open"        {{ 'selected' if ticket.status == 'open' }}>Open</option>
+                        <option value="in_progress" {{ 'selected' if ticket.status == 'in_progress' }}>In Progress</option>
+                        <option value="resolved"    {{ 'selected' if ticket.status == 'resolved' }}>Resolved</option>
+                        <option value="closed"      {{ 'selected' if ticket.status == 'closed' }}>Closed</option>
+                    </select>
+                </div>
+                <button class="td-btn-send" id="sendReplyBtn">
+                    <span class="spinner"></span>
+                    <i class="fas fa-paper-plane send-ico"></i>
+                    {% if ticket.admin_reply %}Update & Resend{% else %}Send Reply{% endif %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom actions -->
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem;">
+        <a href="{{ url_for('admin_support') }}" class="td-btn-back">
+            <i class="fas fa-arrow-left"></i>Back to Tickets
+        </a>
+        <button class="td-btn-delete" id="deleteTicketBtn">
+            <i class="fas fa-trash-alt"></i>Delete Ticket
+        </button>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    var TICKET_ID = {{ ticket.id }};
+    var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    function showAlert(type, msg){
+        var el = document.getElementById('replyAlert');
+        var ico = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        el.innerHTML = '<i class="fas ' + ico + '"></i>' + msg;
+        el.className = 'td-alert ' + type + ' show';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Send reply
+    document.getElementById('sendReplyBtn').addEventListener('click', function(){
+        var reply  = document.getElementById('replyText').value.trim();
+        var status = document.getElementById('statusSelect').value;
+
+        if(!reply){ showAlert('error', 'Reply cannot be empty.'); return; }
+
+        var btn = this;
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        var body = new URLSearchParams({ reply: reply, status: status });
+
+        fetch('/admin/support/' + TICKET_ID + '/reply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': CSRF,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: body.toString()
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if(data.success){
+                showAlert('success', 'Reply sent to user\'s email successfully!');
+
+                // Update badge
+                var badge = document.getElementById('statusBadge');
+                badge.textContent = status.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+                badge.className = 'td-badge ' + status;
+            } else {
+                showAlert('error', data.message || 'Failed to send reply.');
+            }
+        })
+        .catch(function(){ showAlert('error', 'Something went wrong. Please try again.'); })
+        .finally(function(){
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        });
+    });
+
+    // Delete ticket
+    document.getElementById('deleteTicketBtn').addEventListener('click', function(){
+        if(!confirm('Delete this ticket permanently?')) return;
+
+        fetch('/admin/support/' + TICKET_ID + '/delete', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if(data.success){
+                window.location.href = '/admin/support';
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

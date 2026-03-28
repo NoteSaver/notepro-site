@@ -1,0 +1,545 @@
+/**
+ * ================================================================== 
+ * COMPLETE LINE-BY-LINE OVERFLOW/UNDERFLOW MANAGEMENT
+ * ================================================================== 
+ * 
+ * यह CSS line-by-line control करता है:
+ * - Exact height detection
+ * - Overflow handling per line
+ * - Underflow cleanup
+ * - Dynamic page generation
+ */
+
+/* ===== PART 1: PAGE CONTAINER ===== */
+
+.pages-container {
+    /* 📌 Line 1: Basic flex layout */
+    display: flex;
+    flex-direction: column;
+    
+    /* 📌 Line 2: Center pages */
+    align-items: center;
+    
+    /* 📌 Line 3: Gap between pages - यह important है */
+    gap: 30px;
+    
+    /* 📌 Line 4: Padding top और bottom */
+    padding: 20px 0 80px;
+    
+    /* 📌 Line 5: Full width */
+    max-width: 100%;
+    
+    /* 📌 Line 6: Overflow को control करो */
+    overflow-x: visible;
+    overflow-y: visible;
+    
+    /* 📌 Line 7: Position for absolute children */
+    position: relative;
+}
+
+/* ===== PART 2: INDIVIDUAL PAGE - HEIGHT CONTROL ===== */
+
+.editor-page {
+    /* 📌 Line 1: Width - A4 default */
+    width: 210mm;
+    
+    /* 📌 Line 2: CRITICAL - Height auto (not fixed!) */
+    height: auto;
+    
+    /* 📌 Line 3: Minimum height - empty page भी दिखे */
+    min-height: 200px;
+    
+    /* 📌 Line 4: CRITICAL - NO maximum height */
+    max-height: none;
+    
+    /* 📌 Line 5: Margin bottom - pages के बीच space */
+    margin-bottom: 25px;
+    
+    /* 📌 Line 6: Background - pure white */
+    background-color: white !important;
+    
+    /* 📌 Line 7: Shadow effect */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    
+    /* 📌 Line 8: Rounded corners */
+    border-radius: 4px;
+    
+    /* 📌 Line 9: Position for page number/indicator */
+    position: relative;
+    
+    /* 📌 Line 10: Flex shrink - don't compress */
+    flex-shrink: 0;
+    
+    /* 📌 Line 11: Smooth transition on resize */
+    transition: all 0.3s ease-in-out;
+    
+    /* 📌 Line 12: CRITICAL - Overflow को hide करो page border में */
+    overflow: hidden !important;
+    
+    /* 📌 Line 13: Box sizing - padding को width में include करो */
+    box-sizing: border-box;
+}
+
+/* 📌 Active page styling */
+.editor-page.active {
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.25);
+    border: 3px solid #0d6efd;
+    transform: scale(1.01);
+}
+
+/* ===== PART 3: PAGE CONTENT - OVERFLOW DETECTION ===== */
+
+.page-content {
+    /* 📌 Line 1: CRITICAL - Padding control (यही crush करता है) */
+    padding: 40px 60px;
+    
+    /* 📌 Line 2: Content का height - auto (flexible) */
+    height: auto;
+    
+    /* 📌 Line 3: Minimum height - कम से कम कुछ space */
+    min-height: 0;
+    
+    /* 📌 Line 4: CRITICAL - NO maximum height limit */
+    max-height: none;
+    
+    /* 📌 Line 5: CRITICAL - Overflow को visible करो (जिससे overflow detect हो) */
+    overflow: visible;
+    overflow-y: visible;
+    overflow-x: visible;
+    
+    /* 📌 Line 6: Display as block */
+    display: block;
+    
+    /* 📌 Line 7: Box sizing - padding को width में include करो */
+    box-sizing: border-box;
+    
+    /* 📌 Line 8: Outline को remove करो */
+    outline: none;
+    
+    /* 📌 Line 9: Background - pure white */
+    background-color: white !important;
+    
+    /* 📌 Line 10: Font styling */
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    
+    /* 📌 Line 11: Text color */
+    color: #000;
+    
+    /* 📌 Line 12: Word wrapping - long words को break करो */
+    word-wrap: break-word;
+    
+    /* 📌 Line 13: Overflow wrap - word wrap का modern version */
+    overflow-wrap: break-word;
+    
+    /* 📌 Line 14: Word break - CSS3 word breaking */
+    word-break: normal;
+    
+    /* 📌 Line 15: Hyphens - word को hyphenate करो अगर जरूरत हो */
+    hyphens: auto;
+    
+    /* 📌 Line 16: Hide scrollbar (अगर accidentally आए) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* 📌 Line 17: Chrome/Safari scrollbar को hide करो */
+.page-content::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* 📌 Line 18: Focus state */
+.page-content:focus {
+    outline: none;
+    background: #fffef8;
+}
+
+/* ===== PART 4: PARAGRAPH STYLING (LINE-BY-LINE) ===== */
+
+.page-content p {
+    /* 📌 Line 1: Margin control - spacing */
+    margin: 0 0 10px 0;
+    
+    /* 📌 Line 2: Padding - internal spacing */
+    padding: 0;
+    
+    /* 📌 Line 3: Line height - text density */
+    line-height: 1.6;
+}
+
+.page-content p:last-child {
+    /* 📌 Line 1: Last paragraph का margin bottom हटा दो */
+    margin-bottom: 0;
+}
+
+/* ===== PART 5: HEADING STYLING ===== */
+
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+.page-content h5,
+.page-content h6 {
+    /* 📌 Line 1: Margin control */
+    margin: 12px 0 8px 0;
+    
+    /* 📌 Line 2: Padding */
+    padding: 0;
+    
+    /* 📌 Line 3: Line height - headings को compact रखो */
+    line-height: 1.4;
+}
+
+/* ===== PART 6: LIST STYLING ===== */
+
+.page-content ul,
+.page-content ol {
+    /* 📌 Line 1: Margin control */
+    margin: 10px 0;
+    
+    /* 📌 Line 2: Padding - bullet indent */
+    padding: 0 0 0 20px;
+}
+
+.page-content li {
+    /* 📌 Line 1: Margin between items */
+    margin: 5px 0;
+    
+    /* 📌 Line 2: Line height */
+    line-height: 1.6;
+}
+
+/* ===== PART 7: BLOCKQUOTE AND PRE ===== */
+
+.page-content blockquote {
+    /* 📌 Line 1: Margin */
+    margin: 12px 0;
+    
+    /* 📌 Line 2: Padding - left indent */
+    padding: 0 0 0 20px;
+    
+    /* 📌 Line 3: Border left */
+    border-left: 3px solid #ddd;
+}
+
+.page-content pre {
+    /* 📌 Line 1: Margin */
+    margin: 12px 0;
+    
+    /* 📌 Line 2: Padding */
+    padding: 10px;
+    
+    /* 📌 Line 3: Background */
+    background: #f5f5f5;
+    
+    /* 📌 Line 4: Overflow handling */
+    overflow-x: auto;
+    
+    /* 📌 Line 5: Word wrap */
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* ===== PART 8: TABLE STYLING ===== */
+
+.page-content table {
+    /* 📌 Line 1: Width */
+    width: 100%;
+    
+    /* 📌 Line 2: Margin */
+    margin: 12px 0;
+    
+    /* 📌 Line 3: Border collapse */
+    border-collapse: collapse;
+}
+
+.page-content table td,
+.page-content table th {
+    /* 📌 Line 1: Border */
+    border: 1px solid #ddd;
+    
+    /* 📌 Line 2: Padding */
+    padding: 8px;
+}
+
+/* ===== PART 9: PAPER SIZES WITH HEIGHT CONTROL ===== */
+
+/* A4 - 210mm x 297mm */
+.paper-a4 .editor-page {
+    width: 210mm;
+    /* 📌 NO fixed height - auto रहेगा */
+}
+
+.paper-a4 .page-content {
+    /* 📌 A4 margins - 1 inch (25.4mm) = 40px approximately */
+    padding: 40px 60px;
+}
+
+/* Letter - 215.9mm x 279.4mm (US standard) */
+.paper-letter .editor-page {
+    width: 215.9mm;
+    /* 📌 NO fixed height */
+}
+
+.paper-letter .page-content {
+    padding: 40px 60px;
+}
+
+/* Legal - 215.9mm x 355.6mm */
+.paper-legal .editor-page {
+    width: 215.9mm;
+}
+
+.paper-legal .page-content {
+    padding: 35px 50px;
+}
+
+/* A3 - 297mm x 420mm (bigger) */
+.paper-a3 .editor-page {
+    width: 297mm;
+}
+
+.paper-a3 .page-content {
+    padding: 45px 70px;
+}
+
+/* A5 - 148mm x 210mm (smaller) */
+.paper-a5 .editor-page {
+    width: 148mm;
+}
+
+.paper-a5 .page-content {
+    padding: 30px 40px;
+}
+
+/* B4 JIS - 257mm x 364mm */
+.paper-b4jis .editor-page {
+    width: 257mm;
+}
+
+/* B5 JIS - 182mm x 257mm */
+.paper-b5jis .editor-page {
+    width: 182mm;
+}
+
+/* Envelope C5 - 162mm x 229mm */
+.paper-envc5 .editor-page {
+    width: 162mm;
+}
+
+.paper-envc5 .page-content {
+    padding: 15px 20px;
+}
+
+/* Envelope C4 - 229mm x 324mm */
+.paper-envc4 .editor-page {
+    width: 229mm;
+}
+
+/* Envelope DL - 110mm x 220mm */
+.paper-envdl .editor-page {
+    width: 110mm;
+}
+
+.paper-envdl .page-content {
+    padding: 10px 15px;
+}
+
+/* #10 Envelope - 104.8mm x 241.3mm */
+.paper-env10 .editor-page {
+    width: 104.8mm;
+}
+
+.paper-env10 .page-content {
+    padding: 10px 15px;
+}
+
+/* Monarch Envelope - 98.4mm x 190.5mm */
+.paper-envmon .editor-page {
+    width: 98.4mm;
+}
+
+.paper-envmon .page-content {
+    padding: 8px 12px;
+    font-size: 10pt;
+}
+
+/* 11x17 Tabloid */
+.paper-11x17 .editor-page {
+    width: 279.4mm;
+}
+
+/* Executive - 184.1mm x 266.7mm */
+.paper-executive .editor-page {
+    width: 184.1mm;
+}
+
+.paper-executive .page-content {
+    padding: 35px 50px;
+}
+
+/* Tabloid - 279.4mm x 431.8mm */
+.paper-tabloid .editor-page {
+    width: 279.4mm;
+}
+
+/* Plain - Responsive */
+.paper-plain .editor-page {
+    width: 95%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===== PART 10: PAGE INDICATORS ===== */
+
+.page-indicator {
+    /* 📌 Line 1: Position */
+    position: absolute;
+    top: -35px;
+    left: 15px;
+    
+    /* 📌 Line 2: Styling */
+    background: #0d6efd;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    
+    /* 📌 Line 3: Z-index */
+    z-index: 10;
+}
+
+.page-number {
+    /* 📌 Line 1: Position */
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    
+    /* 📌 Line 2: Styling */
+    font-size: 10pt;
+    color: #666;
+    font-family: "Times New Roman", serif;
+    
+    /* 📌 Line 3: Z-index */
+    z-index: 10;
+}
+
+/* ===== PART 11: OVERFLOW DETECTION MARKERS ===== */
+
+/* Debugging - show which pages are overflowing */
+.page-content.overflowing {
+    /* 📌 Visual indicator that content is overflowing */
+    background: rgba(255, 68, 68, 0.05) !important;
+    border-bottom: 3px solid #ff4444;
+}
+
+.page-content.underflowing {
+    /* 📌 Visual indicator that page is underutilized */
+    background: rgba(0, 255, 0, 0.05) !important;
+    border-bottom: 3px solid #00aa00;
+}
+
+/* ===== PART 12: RESPONSIVE DESIGN ===== */
+
+@media (max-width: 1200px) {
+    .pages-container {
+        gap: 20px;
+        padding: 15px 0 60px;
+    }
+    
+    .editor-page {
+        margin-bottom: 15px;
+    }
+    
+    .page-content {
+        padding: 35px 50px;
+    }
+}
+
+@media (max-width: 992px) {
+    .pages-container {
+        gap: 15px;
+        padding: 10px 0 50px;
+    }
+    
+    .editor-page {
+        width: 90% !important;
+        max-width: none;
+    }
+    
+    .page-content {
+        padding: 30px 40px;
+        font-size: 11pt;
+    }
+}
+
+@media (max-width: 768px) {
+    .pages-container {
+        gap: 10px;
+        padding: 8px 0 40px;
+    }
+    
+    .editor-page {
+        width: 95vw !important;
+        max-width: none !important;
+        margin-bottom: 10px;
+    }
+    
+    .page-content {
+        padding: 25px 30px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    
+    .page-indicator {
+        top: -28px;
+        font-size: 10px;
+        left: 10px;
+    }
+    
+    .page-number {
+        bottom: 15px;
+        right: 15px;
+        font-size: 9pt;
+    }
+}
+
+@media (max-width: 480px) {
+    .editor-page {
+        min-height: 50vh;
+    }
+    
+    .page-content {
+        padding: 20px 25px;
+        font-size: 12px;
+    }
+}
+
+/* ===== PART 13: PRINT STYLES ===== */
+
+@media print {
+    .pages-container {
+        gap: 0;
+        padding: 0;
+    }
+    
+    .editor-page {
+        page-break-after: always;
+        box-shadow: none;
+        margin-bottom: 0;
+        break-inside: avoid;
+    }
+    
+    .page-content {
+        overflow: visible !important;
+        height: auto !important;
+    }
+    
+    .page-indicator,
+    .page-number {
+        display: none;
+    }
+}

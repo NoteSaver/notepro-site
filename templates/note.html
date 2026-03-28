@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NoteSaver Pro </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/notepro-professional.css') }}" rel="stylesheet" />
+    <meta name="csrf-token" content="{{ csrf_token }}" />
+
+    <style>
+    /* ── STATUS BAR ─────────────────────────────────────── */
+    .status-bar {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 22px;
+        background: #1e2a3a;
+        color: #c8d8e8;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 0 12px;
+        z-index: 99999;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        border-top: 1px solid #2e3f52;
+        user-select: none;
+    }
+    .status-bar .status-item {
+        display: flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .status-bar .status-item i { font-size: 10px; opacity: 0.75; color: #7eb8e8; }
+    .status-bar .status-item span { color: #d0e4f4; font-weight: 500; }
+
+    body { padding-bottom: 22px; }
+
+    /* ── HEADER ── */
+    .editor-header {
+        background: #1e2a3a !important;
+        border-bottom: 1px solid #2e3f52 !important;
+    }
+    .editor-header::before { display: none !important; }
+
+    /* ── TOGGLE SWITCH ── */
+    .ns-toggle-wrap {
+        position: relative !important; width: 34px !important;
+        height: 18px !important; flex-shrink: 0 !important;
+        display: inline-block !important;
+    }
+    .ns-toggle {
+        opacity: 0 !important; width: 0 !important; height: 0 !important;
+        position: absolute !important; pointer-events: none !important;
+        appearance: none !important; -webkit-appearance: none !important;
+        border: none !important; background: none !important;
+        margin: 0 !important; padding: 0 !important; box-shadow: none !important;
+    }
+    .ns-toggle::before, .ns-toggle::after {
+        display: none !important; content: none !important;
+        background: none !important; opacity: 0 !important;
+        width: 0 !important; height: 0 !important;
+    }
+    .ns-toggle-label {
+        position: absolute !important; inset: 0 !important;
+        background: #3a4a5c !important; border-radius: 9999px !important;
+        cursor: pointer !important; transition: background 0.2s !important;
+        border: none !important; margin: 0 !important; padding: 0 !important;
+    }
+    .ns-toggle-label::after {
+        content: '' !important; display: block !important;
+        position: absolute !important; top: 3px !important; left: 3px !important;
+        width: 12px !important; height: 12px !important;
+        background: #c8d8e8 !important; border-radius: 50% !important;
+        transition: transform 0.2s, background 0.2s !important; opacity: 1 !important;
+    }
+    .ns-toggle-label::before { display: none !important; content: none !important; }
+    .ns-toggle:checked + .ns-toggle-label { background: #4472C4 !important; }
+    .ns-toggle:checked + .ns-toggle-label::after {
+        transform: translateX(16px) !important; background: #ffffff !important;
+    }
+
+    /* ── MS Word Color Palette ── */
+    .word-color-group { display: flex; flex-direction: column; align-items: center; }
+    .word-color-btn-wrap {
+        display: flex; align-items: stretch;
+        border: 1px solid #adadad; border-radius: 3px;
+        overflow: visible; background: #fff; height: 32px;
+    }
+    .word-color-btn-wrap:hover { border-color: #2b579a; box-shadow: 0 0 0 1px #2b579a; }
+    .word-color-apply-btn {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 1px; padding: 3px 5px;
+        background: transparent; border: none; cursor: pointer;
+        min-width: 28px; transition: background 0.12s;
+    }
+    .word-color-apply-btn:hover { background: #e8f0fe; }
+    .word-color-icon { display: flex; align-items: center; justify-content: center; color: #1a1a1a; line-height: 1; }
+    .word-color-bar { display: block; width: 16px; height: 4px; border-radius: 1px; transition: background 0.2s; }
+    .word-color-arrow-btn {
+        display: flex; align-items: center; justify-content: center;
+        padding: 0 4px; background: transparent; border: none;
+        border-left: 1px solid #d0d0d0; cursor: pointer;
+        color: #555; transition: background 0.12s; min-width: 16px;
+    }
+    .word-color-arrow-btn:hover { background: #d0e2ff; }
+
+    .editor-toolbar, .toolbar-group, .word-color-group { overflow: visible !important; }
+
+    .word-palette-dropdown {
+        position: fixed; z-index: 99999;
+        background: #ffffff; border: 1px solid #b0b0b0;
+        border-radius: 4px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.1);
+        padding: 10px 10px 6px 10px; min-width: 192px; user-select: none;
+    }
+    .word-palette-header {
+        font-size: 10px; font-weight: 600; color: #555;
+        letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;
+    }
+    .word-palette-grid {
+        display: grid; grid-template-columns: repeat(10, 18px);
+        gap: 2px; margin-bottom: 2px;
+    }
+    .word-swatch {
+        width: 18px; height: 18px; border-radius: 2px;
+        border: 1px solid rgba(0,0,0,0.15); cursor: pointer;
+        transition: transform 0.1s, box-shadow 0.1s; position: relative;
+    }
+    .word-swatch:hover {
+        transform: scale(1.22); box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+        z-index: 2; border-color: #2b579a;
+    }
+    .word-swatch.selected::after {
+        content: ''; position: absolute; inset: -2px;
+        border: 2px solid #2b579a; border-radius: 3px;
+    }
+    .word-palette-footer {
+        margin-top: 8px; padding-top: 6px;
+        border-top: 1px solid #e0e0e0;
+        display: flex; align-items: center; position: relative;
+    }
+    .word-palette-footer button {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 11.5px; color: #1a1a1a;
+        background: none; border: none; cursor: pointer;
+        padding: 2px 4px; border-radius: 3px; transition: background 0.12s;
+    }
+    .word-palette-footer button:hover { background: #e8f0fe; color: #2b579a; }
+    .word-swatch[data-name]:hover::before {
+        content: attr(data-name); position: absolute;
+        bottom: 100%; left: 50%; transform: translateX(-50%);
+        background: #222; color: #fff; font-size: 10px;
+        padding: 2px 6px; border-radius: 3px;
+        white-space: nowrap; margin-bottom: 4px;
+        pointer-events: none; z-index: 999;
+    }
+    [data-theme="dark"] .word-color-btn-wrap,
+    .dark-mode .word-color-btn-wrap { background: #2d2d2d; border-color: #555; }
+    [data-theme="dark"] .word-color-arrow-btn,
+    .dark-mode .word-color-arrow-btn { border-left-color: #444; color: #ccc; }
+    [data-theme="dark"] .word-color-icon,
+    .dark-mode .word-color-icon { color: #eee; }
+    [data-theme="dark"] .word-palette-dropdown,
+    .dark-mode .word-palette-dropdown { background: #2d2d2d; border-color: #555; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+    [data-theme="dark"] .word-palette-header,
+    .dark-mode .word-palette-header { color: #aaa; }
+    [data-theme="dark"] .word-palette-footer button,
+    .dark-mode .word-palette-footer button { color: #ddd; }
+    [data-theme="dark"] .word-palette-footer,
+    .dark-mode .word-palette-footer { border-top-color: #444; }
+    </style>
+</head>
+<body>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+        <span class="status-item">
+            <i class="fas fa-file-alt"></i>
+            Page <span id="currentPageNum">1</span> of <span id="totalPages">1</span>
+        </span>
+        <span class="status-item">
+            <i class="fas fa-font"></i>
+            <span id="wordCount">0</span> words
+        </span>
+        <span class="status-item">
+            <span style="font-style:normal;font-weight:600;color:#7eb8e8;font-size:12px;">≈</span>
+            <span id="charCount">0</span> chars
+        </span>
+    </div>
+
+    <!-- Auto-save indicator -->
+    <div id="draftIndicator" class="draft-indicator">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span id="draftStatus">Auto-saving...</span>
+    </div>
+
+    <!-- PAPER SIZE PANEL -->
+    <div id="paperPanel" class="paper-panel">
+        <div class="paper-item" data-size="letter">
+            <div class="paper-preview"></div>
+            <div><b>Letter</b><br>8.5" x 11"</div>
+        </div>
+        <div class="paper-item" data-size="legal">
+            <div class="paper-preview legal"></div>
+            <div><b>Legal</b><br>8.5" x 14"</div>
+        </div>
+        <div class="paper-item" data-size="executive">
+            <div class="paper-preview executive"></div>
+            <div><b>Executive</b><br>7.25" x 10.5"</div>
+        </div>
+        <div class="paper-item" data-size="a4">
+            <div class="paper-preview a4"></div>
+            <div><b>A4</b><br>8.269" x 11.694"</div>
+        </div>
+        <div class="paper-item" data-size="a5">
+            <div class="paper-preview a5"></div>
+            <div><b>A5</b><br>5.827" x 8.269"</div>
+        </div>
+    </div>
+
+    <div class="note-editor-wrapper">
+        <!-- Header -->
+        <div class="editor-header d-flex justify-content-between align-items-center"
+             style="background:#1e2a3a !important; border-bottom:1px solid #2e3f52; padding:5px 14px; min-height:36px;">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-sm me-1"
+                   style="color:#c8d8e8;border:1px solid #2e3f52;background:transparent;font-size:12px;padding:2px 10px;"
+                   title="Return to dashboard">
+                    <i class="fas fa-arrow-left me-1"></i>Back
+                </a>
+                <span style="color:#c8d8e8;font-size:13px;font-weight:600;letter-spacing:0.03em;">
+                    <i class="fas fa-file-alt me-1" style="color:#7eb8e8;"></i>NoteSaver Pro
+                </span>
+                <span id="autoSaveStatus" style="color:#7eb8e8;font-size:11px;display:flex;align-items:center;gap:4px;">
+                    <i class="fas fa-circle" style="font-size:7px;color:#4caf50;"></i>Ready
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="ns-toggle-wrap">
+                        <input type="checkbox" id="autoSaveSwitch" class="ns-toggle" checked title="Toggle auto-save" />
+                        <label for="autoSaveSwitch" class="ns-toggle-label"></label>
+                    </div>
+                    <label for="autoSaveSwitch" style="color:#c8d8e8;font-size:12px;cursor:pointer;margin:0;user-select:none;">Auto-save</label>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="ns-toggle-wrap">
+                        <input type="checkbox" id="darkModeSwitch" class="ns-toggle" title="Toggle dark mode" />
+                        <label for="darkModeSwitch" class="ns-toggle-label"></label>
+                    </div>
+                    <label for="darkModeSwitch" style="color:#c8d8e8;font-size:12px;cursor:pointer;margin:0;user-select:none;">Dark Mode</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="editor-toolbar">
+
+            <!-- Save & Print -->
+            <div class="toolbar-group">
+                <button type="submit" form="noteForm" class="toolbar-btn btn-success" title="Save Note to Dashboard">
+                    <i class="fas fa-save"></i> Save Note
+                </button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.printNote()" title="Print">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+
+            <!-- Undo/Redo -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn undo-redo" onclick="wordEditor.undo()" title="Undo (Ctrl+Z)">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button type="button" class="toolbar-btn undo-redo" onclick="wordEditor.redo()" title="Redo (Ctrl+Y)">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+
+            <!-- Font Settings -->
+            <div class="toolbar-group">
+                <div class="form-group">
+                    <label for="fontFamily">Font Family</label>
+                    <select id="fontFamily" class="toolbar-select" title="Choose font family">
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Calibri">Calibri</option>
+                        <option value="Cambria">Cambria</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fontSize">Font Size</label>
+                    <select id="fontSize" class="toolbar-select" title="Choose font size">
+                        <option value="8pt">8</option>
+                        <option value="10pt">10</option>
+                        <option value="12pt" selected>12</option>
+                        <option value="14pt">14</option>
+                        <option value="18pt">18</option>
+                        <option value="24pt">24</option>
+                        <option value="36pt">36</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Text Formatting -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="wordEditor.bold()"          title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.italic()"        title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.underline()"     title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.strikethrough()" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+            </div>
+
+            <!-- Page & Spacing -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="openPageMarginsDialog()"   title="Page Margins"><i class="fas fa-arrows-alt"></i></button>
+                <button type="button" class="toolbar-btn" onclick="openLineSpacingDialog()"   title="Line & Paragraph Spacing"><i class="fas fa-text-height"></i></button>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════
+                 COLOR SETTINGS — MS Word Style
+                 applyColor / applyTextColor / applyBgColor →
+                 sab wordEditor.setTextColor / setHighlight call karte hain
+                 execCommand yahan NAHI hai — JS handle karta hai
+            ═══════════════════════════════════════════════════════ -->
+            <div class="toolbar-group">
+
+                <!-- TEXT COLOR -->
+                <div class="form-group word-color-group" style="position:relative;">
+                    <label>Text Color</label>
+                    <div class="word-color-btn-wrap">
+                        <button type="button" class="word-color-apply-btn"
+                                title="Apply text color"
+                                onclick="wordColorPalette.applyTextColor()">
+                            <span class="word-color-icon">
+                                <svg width="14" height="14" viewBox="0 0 14 14">
+                                    <text x="1" y="11" font-family="Times New Roman, serif"
+                                          font-weight="bold" font-size="13" fill="currentColor">A</text>
+                                </svg>
+                            </span>
+                            <span class="word-color-bar" id="textColorBar" style="background:#000000;"></span>
+                        </button>
+                        <button type="button" class="word-color-arrow-btn"
+                                title="More text colors"
+                                onclick="wordColorPalette.togglePalette('text', this)">
+                            <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                    <div class="word-palette-dropdown" id="textColorPalette" style="display:none;">
+                        <div class="word-palette-header">Theme Colors</div>
+                        <div class="word-palette-grid" id="textThemeGrid"></div>
+                        <div class="word-palette-header" style="margin-top:8px;">Standard Colors</div>
+                        <div class="word-palette-grid" id="textStandardGrid"></div>
+                        <div class="word-palette-footer">
+                            <button type="button" onclick="wordColorPalette.openCustomColor('text')">
+                                <svg width="12" height="12" viewBox="0 0 12 12">
+                                    <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                    <path d="M6 3v6M3 6h6" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                More Colors...
+                            </button>
+                            <input type="color" id="textColorCustom"
+                                   style="position:absolute;opacity:0;width:0;height:0;"
+                                   onchange="wordColorPalette.setCustomColor('text', this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HIGHLIGHT COLOR -->
+                <div class="form-group word-color-group" style="position:relative;">
+                    <label>Highlight</label>
+                    <div class="word-color-btn-wrap">
+                        <button type="button" class="word-color-apply-btn"
+                                title="Apply highlight color"
+                                onclick="wordColorPalette.applyBgColor()">
+                            <span class="word-color-icon">
+                                <svg width="14" height="14" viewBox="0 0 14 14">
+                                    <rect x="3" y="1" width="8" height="9" rx="1.5" fill="currentColor" opacity="0.85"/>
+                                    <polygon points="5,10 9,10 7,14" fill="currentColor"/>
+                                    <rect x="3" y="1" width="8" height="3" rx="1" fill="white" opacity="0.3"/>
+                                </svg>
+                            </span>
+                            <span class="word-color-bar" id="bgColorBar" style="background:#ffff00;"></span>
+                        </button>
+                        <button type="button" class="word-color-arrow-btn"
+                                title="More highlight colors"
+                                onclick="wordColorPalette.togglePalette('bg', this)">
+                            <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                    <div class="word-palette-dropdown" id="bgColorPalette" style="display:none;">
+                        <div class="word-palette-header">Theme Colors</div>
+                        <div class="word-palette-grid" id="bgThemeGrid"></div>
+                        <div class="word-palette-header" style="margin-top:8px;">Standard Colors</div>
+                        <div class="word-palette-grid" id="bgStandardGrid"></div>
+                        <div class="word-palette-footer">
+                            <button type="button" onclick="wordColorPalette.openCustomColor('bg')">
+                                <svg width="12" height="12" viewBox="0 0 12 12">
+                                    <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                    <path d="M6 3v6M3 6h6" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                                More Colors...
+                            </button>
+                            <input type="color" id="bgColorCustom"
+                                   style="position:absolute;opacity:0;width:0;height:0;"
+                                   onchange="wordColorPalette.setCustomColor('bg', this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- END COLOR SETTINGS -->
+
+            <!-- Alignment -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="wordEditor.alignLeft()"    title="Align Left"><i class="fas fa-align-left"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.alignCenter()"  title="Center"><i class="fas fa-align-center"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.alignRight()"   title="Align Right"><i class="fas fa-align-right"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.alignJustify()" title="Justify"><i class="fas fa-align-justify"></i></button>
+            </div>
+
+            <!-- Lists -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="wordEditor.numberedList()" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.bulletList()"   title="Bullet List"><i class="fas fa-list-ul"></i></button>
+            </div>
+
+            <!-- Advanced Features -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="wordEditor.openFindDialog()" title="Find & Replace (Ctrl+F)">
+                    <i class="fas fa-search"></i> Find
+                </button>
+                <button type="button" class="toolbar-btn" onclick="advancedEditor.insertTable()" title="Insert Table">
+                    <i class="fas fa-table"></i> Table
+                </button>
+            </div>
+
+            <!-- Version Control -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="versionControl.openVersionHistory()" title="View Version History">
+                    <i class="fas fa-history"></i> History
+                </button>
+                <button type="button" class="toolbar-btn" onclick="versionControl.openBranchManager()" title="Branch Management">
+                    <i class="fas fa-code-branch"></i> Branches
+                </button>
+            </div>
+
+            <!-- Paper Size -->
+            <div class="toolbar-group">
+                <div class="form-group">
+                    <label for="paperSize">Paper Size</label>
+                    <select id="paperSize" name="paper_size" class="toolbar-select" title="Choose paper size">
+                        <option value="a4"      {% if form_data and form_data.paper_size == 'a4'      %}selected{% endif %}>A4 (21 x 29.7 cm)</option>
+                        <option value="a3"      {% if form_data and form_data.paper_size == 'a3'      %}selected{% endif %}>A3 (29.7 x 42 cm)</option>
+                        <option value="a5"      {% if form_data and form_data.paper_size == 'a5'      %}selected{% endif %}>A5 (14.8 x 21 cm)</option>
+                        <option value="letter"  {% if form_data and form_data.paper_size == 'letter'  %}selected{% endif %}>Letter (21.59 x 27.94 cm)</option>
+                        <option value="legal"   {% if form_data and form_data.paper_size == 'legal'   %}selected{% endif %}>Legal (21.59 x 35.56 cm)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Page Management -->
+            <div class="toolbar-group">
+               <!--   <button type="button" class="toolbar-btn" onclick="wordEditor.insertPageBreak()" title="Insert Page Break (Ctrl+Enter)">
+                    <i class="fas fa-file-plus"></i> Page Break
+                </button> -->
+                <button type="button" class="toolbar-btn" onclick="wordEditor.addNewPage()" title="Add New Page">
+                    <i class="fas fa-file"></i> Add New Page
+                </button>
+                <button type="button" class="toolbar-btn" onclick="wordEditor.insertDateTime()" title="Insert Date/Time">
+                    <i class="fas fa-clock"></i>
+                </button>
+            </div>
+
+            <!-- Help -->
+            <div class="toolbar-group">
+                <button type="button" class="toolbar-btn" onclick="showKeyboardShortcuts()" title="Keyboard Shortcuts & Help">
+                    <i class="fas fa-keyboard"></i> Help
+                </button>
+            </div>
+
+        </div>
+        <!-- END Toolbar -->
+
+        <!-- Editor Content -->
+        <div class="editor-content">
+            <form id="noteForm" method="POST"
+                  action="{% if action == 'Edit' %}{{ url_for('edit_note', note_id=note_id) }}{% else %}{{ url_for('create_note') }}{% endif %}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label-enhanced" for="noteTitle">
+                            <i class="fas fa-heading me-1"></i>Title
+                        </label>
+                        <input type="text" id="noteTitle" name="title" class="form-control-enhanced"
+                               placeholder="Enter your document title..." required
+                               value="{{ form_data.title if form_data else '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label-enhanced" for="noteCategory">
+                            <i class="fas fa-tag me-1"></i>Category
+                        </label>
+                        <input type="text" id="noteCategory" name="category" class="form-control-enhanced"
+                               placeholder="e.g. Work, Personal..."
+                               value="{{ form_data.category if form_data else '' }}">
+                    </div>
+                </div>
+
+                <div id="pagesContainer"
+                     class="pages-container {% if form_data and form_data.paper_size %}paper-{{ form_data.paper_size }}{% else %}paper-a4{% endif %}">
+                </div>
+
+                <input type="hidden" id="noteContent" name="content"
+                       value="{{ form_data.content if form_data and form_data.content else '' }}">
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index:11;">
+        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="successMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/word-editor-flow.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/word_editor_functions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/word_formatting_dialogs.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced-features.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/version-control.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/collaboration-workflow.js') }}"></script>
+
+    <script>
+    // ══════════════════ CSRF ══════════════════
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    $.ajaxSetup({
+        beforeSend(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            }
+        }
+    });
+
+    // ══════════════════ EDIT MODE ══════════════════
+    window.isEditMode      = false;
+    window.shouldSaveDraft = true;
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        if (window.location.pathname.includes('/edit_note/')) {
+            window.isEditMode      = true;
+            window.shouldSaveDraft = false;
+        }
+
+        function initializeWordFlow() {
+            return new Promise((resolve, reject) => {
+                let attempts = 0;
+                const check = setInterval(() => {
+                    if (typeof window.wordFlow !== 'undefined' && window.wordFlow) {
+                        clearInterval(check); resolve(window.wordFlow);
+                    } else if (attempts++ >= 10) {
+                        clearInterval(check); reject(new Error('WordFlow timeout'));
+                    }
+                }, 100);
+            });
+        }
+
+        window.addEventListener('load', async function () {
+            try {
+                await initializeWordFlow();
+                const savedContent = document.getElementById('noteContent');
+                if (window.isEditMode && savedContent && savedContent.value.trim()) {
+                    setTimeout(() => {
+                        try {
+                            if (window.wordFlow && typeof window.wordFlow.deserialize === 'function') {
+                                window.wordFlow.deserialize(savedContent.value);
+                            } else {
+                                const fp = document.querySelector('.page-content');
+                                if (fp) fp.innerHTML = savedContent.value;
+                            }
+                            setTimeout(() => {
+                                if (window.wordFlow?.performReflow) window.wordFlow.performReflow();
+                            }, 200);
+                        } catch (err) { console.error('❌ Error loading edit content:', err); }
+                    }, 400);
+                } else {
+                    setTimeout(() => {
+                        const pc = document.querySelector('.page-content');
+                        if (pc && pc.innerHTML.trim()) window.wordFlow.performReflow();
+                    }, 300);
+                }
+            } catch (e) { console.error('❌ Failed to initialize wordFlow:', e); }
+        });
+
+        // ══ DARK MODE ══
+        document.getElementById('darkModeSwitch').addEventListener('change', function () {
+            const isDark = this.checked;
+            localStorage.setItem('darkMode', isDark);
+            if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+            else        document.documentElement.removeAttribute('data-theme');
+            [
+                document.body,
+                document.querySelector('.note-editor-wrapper'),
+                document.querySelector('.editor-header'),
+                document.querySelector('.editor-toolbar'),
+                document.querySelector('.editor-content'),
+            ].forEach(el => el && el.classList.toggle('dark-mode', isDark));
+            document.querySelectorAll('.toolbar-btn').forEach(b => b.classList.toggle('dark-mode', isDark));
+            document.querySelectorAll('.toolbar-select').forEach(s => s.classList.toggle('dark-mode', isDark));
+            // Page content always stays white
+            document.querySelectorAll('.page-content').forEach(p => {
+                p.style.backgroundColor = '#ffffff';
+                p.style.color = '#000000';
+            });
+        });
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.getElementById('darkModeSwitch').checked = true;
+            document.getElementById('darkModeSwitch').dispatchEvent(new Event('change'));
+        }
+    });
+
+    // ══════════════════ TOAST ══════════════════
+    function showToast(message, type) {
+        const toastId   = type === 'success' ? 'successToast' : 'errorToast';
+        const messageId = type === 'success' ? 'successMessage' : 'errorMessage';
+        const msgEl     = document.getElementById(messageId);
+        const toastEl   = document.getElementById(toastId);
+        if (msgEl && toastEl) {
+            msgEl.textContent = message;
+            new bootstrap.Toast(toastEl, { delay: type === 'error' ? 5000 : 3000 }).show();
+        }
+    }
+
+    // ══════════════════ AUTO-SAVE ══════════════════
+    document.addEventListener('DOMContentLoaded', function () {
+        const autoSaveSwitch = document.getElementById('autoSaveSwitch');
+        const draftIndicator = document.getElementById('draftIndicator');
+        const draftStatus    = document.getElementById('draftStatus');
+        const AUTO_SAVE_INTERVAL = 30000;
+        let autoSaveTimer = null;
+
+        function collectContent() {
+            let all = '';
+            document.querySelectorAll('.page-content').forEach((p, i, arr) => {
+                all += p.innerHTML;
+                if (i < arr.length - 1) all += '<div class="page-break-marker"></div>';
+            });
+            return all;
+        }
+
+        function startAutoSave() {
+            autoSaveTimer = setInterval(() => {
+                if (!autoSaveSwitch.checked || !window.shouldSaveDraft) return;
+                draftIndicator.classList.add('show');
+                draftStatus.textContent = 'Saving...';
+                draftIndicator.classList.add('saving');
+                const allContent = collectContent();
+                try {
+                    localStorage.setItem('noteDraft', JSON.stringify({
+                        title:     document.getElementById('noteTitle').value,
+                        category:  document.getElementById('noteCategory').value || '',
+                        content:   allContent,
+                        timestamp: new Date().toISOString(),
+                    }));
+                } catch (e) {
+                    try {
+                        localStorage.removeItem('noteDraft');
+                        localStorage.setItem('noteDraft', JSON.stringify({
+                            title:     document.getElementById('noteTitle').value,
+                            category:  document.getElementById('noteCategory').value || '',
+                            content:   allContent.substring(0, 50000),
+                            timestamp: new Date().toISOString(),
+                        }));
+                    } catch (e2) { console.warn('⚠️ Draft save failed'); }
+                }
+                setTimeout(() => {
+                    draftStatus.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+                    draftIndicator.classList.remove('saving');
+                    draftIndicator.classList.add('saved');
+                    setTimeout(() => draftIndicator.classList.remove('show'), 3000);
+                }, 500);
+            }, AUTO_SAVE_INTERVAL);
+        }
+
+        autoSaveSwitch.addEventListener('change', function () {
+            localStorage.setItem('autoSaveEnabled', this.checked);
+            if (this.checked) startAutoSave();
+            else if (autoSaveTimer) clearInterval(autoSaveTimer);
+        });
+
+        if (autoSaveSwitch.checked) startAutoSave();
+    });
+
+    // ══════════════════ FORM SUBMIT ══════════════════
+    document.getElementById('noteForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const saveBtn      = document.querySelector('button[form="noteForm"]');
+        const originalText = saveBtn.innerHTML;
+
+        try {
+            const pages = document.querySelectorAll('.page-content');
+            if (!pages.length) { showToast('❌ No pages found', 'error'); return; }
+
+            let allContent = '';
+            pages.forEach((p, i, arr) => {
+                allContent += p.innerHTML;
+                if (i < arr.length - 1) allContent += '<div class="page-break-marker"></div>';
+            });
+
+            const textContent = allContent.replace(/<[^>]*>/g, '').trim();
+            if (!textContent)           { showToast('❌ Cannot save empty document', 'error'); return; }
+            if (!document.getElementById('noteTitle')?.value.trim()) { showToast('❌ Please enter a title', 'error'); return; }
+            if (textContent.length < 10) { showToast('❌ Document must have at least 10 characters', 'error'); return; }
+            if (pages.length > 100)      { showToast('❌ Document has too many pages (max 100)', 'error'); return; }
+
+            let contentInput = document.getElementById('noteContent');
+            if (!contentInput) {
+                contentInput = document.createElement('input');
+                contentInput.type = 'hidden'; contentInput.id = 'noteContent'; contentInput.name = 'content';
+                this.appendChild(contentInput);
+            }
+            contentInput.value = allContent;
+
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled  = true;
+
+            const formData = new FormData(this);
+            formData.set('content', allContent);
+
+            fetch(this.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData,
+                credentials: 'same-origin',
+            })
+            .then(r => r.ok ? r.json() : Promise.reject(r))
+            .then(data => {
+                if (data.success || data.id) {
+                    localStorage.removeItem('noteDraft');
+                    showToast('✅ Note saved successfully!', 'success');
+                    setTimeout(() => { window.location.href = data.redirect_url || '/dashboard'; }, 1000);
+                } else {
+                    showToast('❌ Error: ' + (data.error || 'Unknown error'), 'error');
+                    saveBtn.innerHTML = originalText; saveBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error('Save error:', err);
+                showToast('❌ Error saving note', 'error');
+                saveBtn.innerHTML = originalText; saveBtn.disabled = false;
+            });
+
+        } catch (err) {
+            console.error('Unexpected error:', err);
+            showToast('❌ Unexpected error occurred', 'error');
+            saveBtn.innerHTML = originalText; saveBtn.disabled = false;
+        }
+    });
+
+    // ══════════════════════════════════════════════════════════
+    //  MS WORD COLOR PALETTE
+    //
+    //  ✅ applyColor     → wordEditor.setTextColor / setHighlight
+    //  ✅ applyTextColor → wordEditor.setTextColor
+    //  ✅ applyBgColor   → wordEditor.setHighlight
+    //
+    //  execCommand NAHI hai yahan — JS ka multi-page engine use hota hai
+    // ══════════════════════════════════════════════════════════
+    const wordColorPalette = (() => {
+
+        const THEME_COLORS = [
+            {hex:'#FFFFFF',name:'White'},{hex:'#000000',name:'Black'},
+            {hex:'#E7E6E6',name:'Light Gray'},{hex:'#44546A',name:'Dark Blue-Gray'},
+            {hex:'#4472C4',name:'Blue'},{hex:'#ED7D31',name:'Orange'},
+            {hex:'#A9D18E',name:'Light Green'},{hex:'#FF0000',name:'Red'},
+            {hex:'#FFC000',name:'Gold'},{hex:'#70AD47',name:'Green'},
+            {hex:'#F2F2F2',name:'White, Darker 5%'},{hex:'#7F7F7F',name:'Black, Lighter 50%'},
+            {hex:'#D0CECE',name:'Light Gray, Darker 10%'},{hex:'#D6DCE4',name:'Dark Blue-Gray, Lighter 80%'},
+            {hex:'#D9E2F3',name:'Blue, Lighter 80%'},{hex:'#FCE4D6',name:'Orange, Lighter 80%'},
+            {hex:'#E2EFDA',name:'Light Green, Lighter 80%'},{hex:'#FFCCCC',name:'Red, Lighter 80%'},
+            {hex:'#FFF2CC',name:'Gold, Lighter 80%'},{hex:'#E2EFDA',name:'Green, Lighter 80%'},
+            {hex:'#D9D9D9',name:'White, Darker 15%'},{hex:'#595959',name:'Black, Lighter 35%'},
+            {hex:'#AEAAAA',name:'Light Gray, Darker 25%'},{hex:'#ACB9CA',name:'Dark Blue-Gray, Lighter 60%'},
+            {hex:'#B4C6E7',name:'Blue, Lighter 60%'},{hex:'#F8CBAD',name:'Orange, Lighter 60%'},
+            {hex:'#C6E0B4',name:'Light Green, Lighter 60%'},{hex:'#FF9999',name:'Red, Lighter 60%'},
+            {hex:'#FFE699',name:'Gold, Lighter 60%'},{hex:'#C6E0B4',name:'Green, Lighter 60%'},
+            {hex:'#BFBFBF',name:'White, Darker 25%'},{hex:'#404040',name:'Black, Lighter 25%'},
+            {hex:'#767171',name:'Light Gray, Darker 50%'},{hex:'#8497B0',name:'Dark Blue-Gray, Lighter 40%'},
+            {hex:'#8EAADB',name:'Blue, Lighter 40%'},{hex:'#F4B183',name:'Orange, Lighter 40%'},
+            {hex:'#A9D18E',name:'Light Green, Lighter 40%'},{hex:'#FF6666',name:'Red, Lighter 40%'},
+            {hex:'#FFD966',name:'Gold, Lighter 40%'},{hex:'#A9D18E',name:'Green, Lighter 40%'},
+            {hex:'#A6A6A6',name:'White, Darker 35%'},{hex:'#262626',name:'Black, Lighter 15%'},
+            {hex:'#3A3838',name:'Light Gray, Darker 75%'},{hex:'#323F4F',name:'Dark Blue-Gray, Darker 25%'},
+            {hex:'#2E5597',name:'Blue, Darker 25%'},{hex:'#C45911',name:'Orange, Darker 25%'},
+            {hex:'#538135',name:'Light Green, Darker 25%'},{hex:'#C00000',name:'Red, Darker 25%'},
+            {hex:'#BF8F00',name:'Gold, Darker 25%'},{hex:'#375623',name:'Green, Darker 25%'},
+            {hex:'#808080',name:'White, Darker 50%'},{hex:'#0D0D0D',name:'Black, Lighter 5%'},
+            {hex:'#171515',name:'Light Gray, Darker 90%'},{hex:'#222B35',name:'Dark Blue-Gray, Darker 50%'},
+            {hex:'#1F3864',name:'Blue, Darker 50%'},{hex:'#833C00',name:'Orange, Darker 50%'},
+            {hex:'#375623',name:'Light Green, Darker 50%'},{hex:'#800000',name:'Red, Darker 50%'},
+            {hex:'#7F6000',name:'Gold, Darker 50%'},{hex:'#1E4620',name:'Green, Darker 50%'},
+        ];
+
+        const STANDARD_COLORS = [
+            {hex:'#C00000',name:'Dark Red'},{hex:'#FF0000',name:'Red'},
+            {hex:'#FFC000',name:'Orange'},{hex:'#FFFF00',name:'Yellow'},
+            {hex:'#92D050',name:'Light Green'},{hex:'#00B050',name:'Green'},
+            {hex:'#00B0F0',name:'Light Blue'},{hex:'#0070C0',name:'Blue'},
+            {hex:'#002060',name:'Dark Blue'},{hex:'#7030A0',name:'Purple'},
+        ];
+
+        let currentTextColor = '#000000';
+        let currentBgColor   = '#ffff00';
+        let savedSelection   = null;
+
+        // ── Grid builder ──
+        function buildGrid(gridEl, colors) {
+            gridEl.innerHTML = '';
+            colors.forEach(c => {
+                const sw = document.createElement('div');
+                sw.className        = 'word-swatch';
+                sw.style.background = c.hex;
+                sw.dataset.name     = c.name;
+                sw.title            = c.name;
+                sw.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const type = gridEl.id.startsWith('text') ? 'text' : 'bg';
+                    applyColor(type, c.hex);
+                    closeAll();
+                });
+                gridEl.appendChild(sw);
+            });
+        }
+
+        function init() {
+            buildGrid(document.getElementById('textThemeGrid'),    THEME_COLORS);
+            buildGrid(document.getElementById('textStandardGrid'), STANDARD_COLORS);
+            buildGrid(document.getElementById('bgThemeGrid'),      THEME_COLORS);
+            buildGrid(document.getElementById('bgStandardGrid'),   STANDARD_COLORS);
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.word-color-group')) closeAll();
+            });
+        }
+
+        // ── Selection save/restore ──
+        function saveSelection() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) savedSelection = sel.getRangeAt(0).cloneRange();
+        }
+
+        function restoreSelection() {
+            if (!savedSelection) return false;
+            try {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedSelection);
+                return true;
+            } catch (_) { return false; }
+        }
+
+        // ══════════════════════════════════════════════════════
+        //  applyColor — CENTRAL FUNCTION
+        //  execCommand BILKUL NAHI — wordEditor ke smart functions
+        //  setTextColor / setHighlight handle karte hain:
+        //    ✅ Single page selection
+        //    ✅ Multi-page selection (Ctrl+A ke baad bhi)
+        //    ✅ Cursor pe (bina selection ke)
+        // ══════════════════════════════════════════════════════
+        function applyColor(type, hex) {
+            if (type === 'text') {
+                currentTextColor = hex;
+                document.getElementById('textColorBar').style.background = hex;
+                restoreSelection();
+                if (window.wordEditor) window.wordEditor.setTextColor(hex);
+            } else {
+                currentBgColor = hex;
+                document.getElementById('bgColorBar').style.background = hex;
+                restoreSelection();
+                if (window.wordEditor) window.wordEditor.setHighlight(hex);
+            }
+        }
+
+        // ── Palette positioning — hamesha button ke NICHE, left-align ──
+        function positionPalette(palette, triggerBtn) {
+            // Pehle display karo taaki dimensions mil sakein
+            palette.style.visibility = 'hidden';
+            palette.style.display    = 'block';
+
+            const rect    = triggerBtn.getBoundingClientRect();
+            const pw      = palette.offsetWidth  || 210;
+            const ph      = palette.offsetHeight || 200;
+            const vw      = window.innerWidth;
+            const vh      = window.innerHeight;
+
+            // ── Top: hamesha button ke niche ──
+            let top = rect.bottom + 4;
+            // Agar niche jagah nahi → upar dikhao
+            if (top + ph > vh - 10) top = rect.top - ph - 4;
+            if (top < 4) top = 4;
+
+            // ── Left: button ke left edge se, par screen se bahar na jaye ──
+            let left = rect.left;
+            if (left + pw > vw - 8) left = vw - pw - 8;
+            if (left < 4) left = 4;
+
+            palette.style.top        = top  + 'px';
+            palette.style.left       = left + 'px';
+            palette.style.visibility = 'visible';
+        }
+
+        function togglePalette(type, triggerEl) {
+            saveSelection();
+            const textPal = document.getElementById('textColorPalette');
+            const bgPal   = document.getElementById('bgColorPalette');
+            if (type === 'text') {
+                const isOpen = textPal.style.display !== 'none';
+                closeAll();
+                if (!isOpen) { textPal.style.display = 'none'; positionPalette(textPal, triggerEl); }
+            } else {
+                const isOpen = bgPal.style.display !== 'none';
+                closeAll();
+                if (!isOpen) { bgPal.style.display = 'none'; positionPalette(bgPal, triggerEl); }
+            }
+        }
+
+        function closeAll() {
+            document.getElementById('textColorPalette').style.display = 'none';
+            document.getElementById('bgColorPalette').style.display   = 'none';
+        }
+
+        // ── Apply buttons (toolbar pe) ──
+        function applyTextColor() {
+            restoreSelection();
+            if (window.wordEditor) window.wordEditor.setTextColor(currentTextColor);
+        }
+
+        function applyBgColor() {
+            restoreSelection();
+            if (window.wordEditor) window.wordEditor.setHighlight(currentBgColor);
+        }
+
+        function openCustomColor(type) {
+            closeAll();
+            document.getElementById(type === 'text' ? 'textColorCustom' : 'bgColorCustom').click();
+        }
+
+        function setCustomColor(type, hex) { applyColor(type, hex); }
+
+        // ════════════════════════════════════════════════════════
+        //  FIX v4.3: Save selection on mousedown ANYWHERE
+        //  (not just outside .word-color-group).
+        //  Clicking the ▼ arrow button was losing the selection
+        //  before applyColor() could call restoreSelection().
+        //  Now we save on EVERY mousedown and restore correctly.
+        // ════════════════════════════════════════════════════════
+document.addEventListener('mousedown', (e) => {
+    const isPaletteClick = e.target.closest?.('.word-color-group') ||
+                           e.target.closest?.('.word-palette-dropdown');
+
+    if (isPaletteClick) {
+        saveSelection();   // पहले save करो
+        setTimeout(() => restoreSelection(), 0); // फिर restore
+        return;
+    }
+
+    saveSelection();
+});
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
+
+        return { togglePalette, applyTextColor, applyBgColor, openCustomColor, setCustomColor };
+    })();
+
+    // ══════════════════ DEVTOOLS DISABLE ══════════════════
+    // NOTE: contextmenu block HATAYA GAYA — JS ka custom menu kaam kare
+    document.addEventListener('keydown', function (e) {
+        const isInsideEditor = document.activeElement?.classList?.contains('page-content');
+        if (isInsideEditor) return;
+        if (
+            e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) ||
+            (e.ctrlKey && e.key.toLowerCase() === 'u')
+        ) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    </script>
+</body>
+</html>

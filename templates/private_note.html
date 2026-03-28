@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ action }}</title>
+    <style>
+        /* Password field wrapper for relative positioning */
+        .password-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        /* Show/hide icon styling */
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+    <script>
+        // Simple client-side password validation example
+        function validateForm() {
+            const passwordField = document.getElementById('private_password');
+            const password = passwordField.value.trim();
+            if (passwordField.closest('form').querySelector('#is_private')?.checked) {
+                // Validate only if Private mode is checked
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long.');
+                    passwordField.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordField = document.getElementById('private_password');
+
+            togglePassword.addEventListener('click', () => {
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+            });
+
+            // Optional: toggle password field visibility based on is_private checkbox
+            const privateCheckbox = document.getElementById('is_private');
+            function togglePasswordVisibility() {
+                const wrapper = document.querySelector('.password-wrapper');
+                if (privateCheckbox.checked) {
+                    wrapper.style.display = 'inline-block';
+                } else {
+                    wrapper.style.display = 'none';
+                    passwordField.value = '';
+                }
+            }
+            if (privateCheckbox) {
+                togglePasswordVisibility();
+                privateCheckbox.addEventListener('change', togglePasswordVisibility);
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>{{ action }}</h1>
+    <form method="POST" onsubmit="return validateForm();">
+        {{ form.hidden_tag() }}
+
+        <label for="title">Title:</label><br />
+        {{ form.title(size=40) }}<br /><br />
+
+        <label for="content">Content:</label><br />
+        {{ form.content(rows=10, cols=40) }}<br /><br />
+
+        <label for="category">Category:</label><br />
+        {{ form.category(size=40) }}<br /><br />
+
+        <label>
+          {{ form.is_private(id="is_private") }} Private Mode
+        </label><br /><br />
+
+        <label for="private_password">Private Password:</label><br />
+        <div class="password-wrapper">
+            {{ form.private_password(id="private_password", size=40) }}
+            <span id="togglePassword" class="toggle-password" title="Show/Hide Password">👁️</span>
+        </div><br /><br />
+
+        <button type="submit">{{ action }}</button>
+    </form>
+    <p><a href="{{ url_for('dashboard') }}">Back to Dashboard</a></p>
+</body>
+</html>

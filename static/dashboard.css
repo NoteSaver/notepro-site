@@ -1,0 +1,393 @@
+/* ======================================================
+   NOTE SAVER PRO - CLEAN PROFESSIONAL DASHBOARD
+   No Glass | No Blur | Fast UI | SaaS Style
+   ====================================================== */
+
+
+/* ---------------- ROOT ---------------- */
+
+:root{
+    --primary:#2563eb;
+    --primary-dark:#1e40af;
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --border:#e5e7eb;
+    --soft:#f8fafc;
+    --text:#1f2937;
+    --muted:#6b7280;
+
+    --radius:14px;
+    --shadow:0 4px 12px rgba(0,0,0,.08);
+    --shadow-hover:0 10px 28px rgba(0,0,0,.18);
+}
+
+
+/* ---------------- PAGE ---------------- */
+
+.dashboard-wrapper{
+    max-width:1200px;
+    margin:auto;
+}
+
+/* title */
+
+.dashboard-wrapper h2{
+    font-weight:700;
+    color:var(--text);
+}
+
+.dashboard-wrapper h2 i{
+    color:var(--primary);
+}
+
+
+/* ---------------- STATS CARDS ---------------- */
+
+.row.mb-4 .card{
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:#ffffff;
+    box-shadow:var(--shadow);
+    transition:.25s ease;
+}
+
+.row.mb-4 .card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-hover);
+}
+
+.row.mb-4 .card h3{
+    font-weight:700;
+}
+
+.row.mb-4 .card i{
+    opacity:.8;
+}
+
+
+/* ---------------- SEARCH FILTER ---------------- */
+
+.card.mb-4{
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:#ffffff;
+    box-shadow:var(--shadow);
+}
+
+.card.mb-4 input,
+.card.mb-4 select{
+    border-radius:10px;
+    border:1px solid var(--border);
+    padding:.55rem .7rem;
+}
+
+.card.mb-4 input:focus,
+.card.mb-4 select:focus{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(37,99,235,.18);
+}
+
+
+/* ---------------- NOTE CARDS ---------------- */
+
+.note-card{
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:#ffffff;
+    box-shadow:var(--shadow);
+    transition:.25s ease;
+    position:relative;
+    overflow:hidden;
+}
+
+.note-card:hover{
+    transform:translateY(-6px);
+    box-shadow:var(--shadow-hover);
+}
+
+/* left accent line */
+
+.note-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:3px;
+    height:100%;
+    background:var(--primary);
+    opacity:0;
+    transition:.25s;
+}
+
+.note-card:hover::before{
+    opacity:1;
+}
+
+.note-title{
+    font-weight:600;
+    color:var(--text);
+}
+
+.note-preview{
+    color:var(--muted);
+    line-height:1.5;
+    height:4.5em;
+    overflow:hidden;
+}
+
+
+/* protected note */
+
+.protected-card{
+    border-left:3px solid var(--danger) !important;
+}
+
+
+/* ---------------- BUTTONS ---------------- */
+
+.btn{
+    border-radius:10px;
+    transition:.2s;
+}
+
+.btn-primary{
+    background:var(--primary);
+    border:none;
+}
+
+.btn-primary:hover{
+    background:var(--primary-dark);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-danger:hover,
+.btn-outline-warning:hover{
+    transform:translateY(-1px);
+}
+
+
+/* favorite star */
+
+.favorite-btn i{
+    transition:.2s;
+}
+
+.favorite-btn:hover i{
+    transform:scale(1.2);
+    color:#f59e0b;
+}
+
+/* share */
+
+.share-btn:hover i{
+    transform:rotate(12deg);
+}
+
+
+/* ---------------- DROPDOWN ---------------- */
+
+.dropdown-menu{
+    border:1px solid var(--border);
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.dropdown-item{
+    border-radius:8px;
+    transition:.15s;
+}
+
+.dropdown-item:hover{
+    background:#f3f4f6;
+}
+
+
+/* ---------------- PAGINATION ---------------- */
+
+.pagination .page-link{
+    border-radius:8px;
+    margin:0 2px;
+    border:1px solid var(--border);
+    color:var(--text);
+}
+
+.pagination .page-item.active .page-link{
+    background:var(--primary);
+    border-color:var(--primary);
+}
+
+
+/* ---------------- MODAL ---------------- */
+
+.modal-content{
+    border-radius:14px;
+    border:none;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+
+
+/* ---------------- TOAST ---------------- */
+
+.toast{
+    border-radius:12px;
+}
+
+
+/* ---------------- DARK MODE ---------------- */
+
+body.dark-theme .note-card,
+body.dark-theme .row.mb-4 .card,
+body.dark-theme .card.mb-4{
+    background:#1e293b;
+    border-color:#334155;
+    color:#e2e8f0;
+}
+
+body.dark-theme .note-preview{
+    color:#cbd5e1;
+}
+
+body.dark-theme .dropdown-menu{
+    background:#1e293b;
+    border-color:#334155;
+}
+
+body.dark-theme .dropdown-item:hover{
+    background:#334155;
+}
+
+
+/* ---------------- MOBILE ---------------- */
+
+@media(max-width:768px){
+
+    .note-card:hover{
+        transform:none;
+        box-shadow:var(--shadow);
+    }
+
+    .row.mb-4 .card:hover{
+        transform:none;
+    }
+
+}
+/* =====================================================
+   DARK MODE TEXT VISIBILITY FIX
+   ===================================================== */
+
+body.dark-theme{
+    color:#e2e8f0;
+}
+
+/* headings */
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme h6{
+    color:#f1f5f9 !important;
+}
+
+/* paragraph & normal text */
+body.dark-theme p,
+body.dark-theme span,
+body.dark-theme small,
+body.dark-theme label{
+    color:#cbd5e1 !important;
+}
+
+/* card content */
+body.dark-theme .card-body,
+body.dark-theme .card-footer{
+    color:#e2e8f0;
+}
+
+/* NOTE TEXT (MAIN PROBLEM) */
+body.dark-theme .note-title{
+    color:#f8fafc !important;
+}
+
+body.dark-theme .note-preview{
+    color:#cbd5e1 !important;
+}
+
+/* stats cards text */
+body.dark-theme .row.mb-4 .card h3,
+body.dark-theme .row.mb-4 .card h5,
+body.dark-theme .row.mb-4 .card h6{
+    color:white !important;
+}
+
+/* badges */
+body.dark-theme .badge{
+    color:white !important;
+}
+
+/* input fields */
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea{
+    background:#0f172a !important;
+    border-color:#334155 !important;
+    color:#e2e8f0 !important;
+}
+
+body.dark-theme input::placeholder{
+    color:#94a3b8 !important;
+}
+
+/* dropdown */
+body.dark-theme .dropdown-menu{
+    background:#1e293b !important;
+    border:1px solid #334155 !important;
+}
+
+body.dark-theme .dropdown-item{
+    color:#e2e8f0 !important;
+}
+
+body.dark-theme .dropdown-item:hover{
+    background:#334155 !important;
+}
+
+/* buttons outline */
+body.dark-theme .btn-outline-primary{
+    color:#60a5fa;
+    border-color:#60a5fa;
+}
+
+body.dark-theme .btn-outline-danger{
+    color:#f87171;
+    border-color:#f87171;
+}
+
+/* pagination */
+body.dark-theme .pagination .page-link{
+    background:#1e293b;
+    border-color:#334155;
+    color:#e2e8f0;
+}
+
+body.dark-theme .pagination .page-item.active .page-link{
+    background:#2563eb;
+    border-color:#2563eb;
+    color:white;
+}
+/* ===== FIX: Dropdown & clickable cursor ===== */
+
+a,
+button,
+.dropdown-item,
+.btn,
+.page-link{
+    cursor:pointer !important;
+}
+
+/* icon buttons also clickable */
+.favorite-btn,
+.share-btn,
+.private-btn{
+    cursor:pointer !important;
+}
