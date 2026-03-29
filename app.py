@@ -344,38 +344,31 @@ def support_send_email():
         db.session.commit()
  
         # Email to admin
-        try:
-            admin_msg = Message(
-                subject  = f'[{category.upper()}] {subject} — Ticket {ref}',
-                sender   = app.config.get('MAIL_DEFAULT_SENDER', 'noreply@notesaverpro.com'),
-                recipients = [app.config.get('ADMIN_EMAIL', 'admin@notesaverpro.com')],
-                body = f"""New Support Ticket Received
+       try:
+    admin_msg = Message(
+        subject  = f'[{category.upper()}] {subject} — Ticket {ref}',
+        sender   = app.config.get('MAIL_DEFAULT_SENDER', 'noreply@notesaverpro.com'),
+        recipients = [app.config.get('ADMIN_EMAIL', 'admin@notesaverpro.com')],
+        body = f"""New Support Ticket Received
 ══════════════════════════
 Ticket Ref : {ref}
 From       : {current_user.username} ({current_user.email})
 Category   : {category}
 Subject    : {subject}
 Date       : {datetime.utcnow().strftime('%d %b %Y, %I:%M %p')} UTC
- 
+
 Message:
 {message}
- 
+
 ══════════════════════════
 Reply at: {request.host_url}admin/support
 """
-            )
-_dispatch_email(admin_msg)
-        except Exception as mail_err:
-            logger.warning(f'Admin email queue failed: {mail_err}')
- 
-        # Confirmation email to user
-        try:
-            user_msg = Message(
-                subject    = f'We received your request — {ref}',
-                sender     = app.config.get('MAIL_DEFAULT_SENDER', 'noreply@notesaverpro.com'),
-                recipients = [current_user.email],
-                body = f"""Hi {current_user.first_name or current_user.username},
- 
+    )
+
+    _dispatch_email(admin_msg)   # ✅ ab try ke andar
+
+except Exception as mail_err:
+    logger.warning(f'Admin email queue failed: {mail_err}')
 Thank you for contacting NoteSaver Pro Support.
  
 Your ticket has been created:
