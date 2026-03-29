@@ -364,10 +364,9 @@ Message:
 Reply at: {request.host_url}admin/support
 """
             )
-            mail.send(admin_msg)
+_dispatch_email(admin_msg)
         except Exception as mail_err:
-            print(f'Admin email failed: {mail_err}')
-            # Ticket saved in DB, email fail hone se ticket delete nahi hoga
+            logger.warning(f'Admin email queue failed: {mail_err}')
  
         # Confirmation email to user
         try:
@@ -391,9 +390,9 @@ Best regards,
 NoteSaver Pro Support Team
 """
             )
-            mail.send(user_msg)
+_dispatch_email(user_msg)
         except Exception as mail_err:
-            print(f'User confirmation email failed: {mail_err}')
+            logger.warning(f'User confirmation email queue failed: {mail_err}')
  
         return jsonify({'success': True, 'ticket_ref': ref})
  
@@ -504,9 +503,9 @@ Best regards,
 NoteSaver Pro Support Team
 """
         )
-        mail.send(reply_msg)
+_dispatch_email(reply_msg)
     except Exception as e:
-        print(f'Reply email failed: {e}')
+        logger.warning(f'Reply email queue failed: {e}')
  
     return jsonify({
         'success': True,
@@ -1146,9 +1145,9 @@ def send_email_helper(to_email, subject, html_body):
         )
         
         logger.info(f"📤 Sending email...")
-        mail.send(msg)
-        
-        logger.info(f"✅ Email sent successfully to {to_email}")
+# Send email async — never blocks worker
+        _dispatch_email(msg)
+        logger.info(f"✅ Note password reset email queued for: {user.email}")
         return True, None
         
     except Exception as e:
