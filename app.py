@@ -77,7 +77,7 @@ from models import User, Note, Collaborator, UserSession, Review, SupportTicket,
 from forms import RegistrationForm, LoginForm, NoteForm, RequestResetForm, ResetPasswordForm, RequestUsernameForm
 from datetime import datetime
 import secrets
-
+import threading
 
 # ──────────────────────────────────────────────────────────
 # 6 ▸ LOGGER — must be set up BEFORE any optional imports
@@ -2384,12 +2384,18 @@ def send_reset_email(user):
     token = serializer.dumps(user.email, salt='password-reset-salt')
     reset_url = url_for('reset_password', token=token, _external=True)
 
-    msg = Message("Password Reset Request",
-                  sender=app.config['MAIL_DEFAULT_SENDER'],
-                  recipients=[user.email])
-    msg.body = f"To reset your password, visit the following link:\n\n{reset_url}\n\nIf you did not make this request, simply ignore this email."
-    
-    mail.send(msg)
+    msg = Message(
+        "Password Reset Request",
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[user.email]
+    )
+    msg.body = (
+        f"To reset your password, visit:\n\n{reset_url}\n\n"
+        "If you did not request this, ignore this email."
+    )
+    thread = threading.Thread(target=_send_mail_async, args=(app._get_current_object(), msg))
+    thread.daemon = True
+    thread.start()
     flash('A password reset link has been sent to your email.', 'info')
 
 # Helper function for note access control
@@ -2492,53 +2498,58 @@ def is_otp_valid(email, otp_code):
         return True
     return False
 
-def send_verification_email(user, otp_code):
-    """Sends the OTP email using Flask-Mail."""
-    try:
-        # sender=current_app.config['MAIL_DEFAULT_SENDER'] को 
-        # sender=app.config['MAIL_DEFAULT_SENDER'] से बदलें 
-        # (चूंकि 'app' वैश्विक रूप से परिभाषित है)
+def _send_mail_async(app, msg):
+    """Send a Flask-Mail message in a background thread."""
+    with app.app_context():
+        try:
+            mail.send(msg)
+            logger.info(f"Async email sent to {msg.recipients}")
+        except Exception as e:
+            logger.error(f"Async email failed to {msg.recipients}: {e}")
 
-        msg = Message("NoteSaver Pro: Email Verification Code",
-                      sender=app.config['MAIL_DEFAULT_SENDER'],
-                      recipients=[user.email])
-        
-        # HTML को हटा दें (या उसे ठीक करें, लेकिन केवल body का उपयोग करना सुरक्षित है)
-        # msg.html = render_template('email/otp_template.html', user=user, otp=otp_code) # ❌ इसे हटाएँ
-        
+
+def send_verification_email(user, otp_code):
+    """Queue OTP email in background thread — never blocks the web worker."""
+    try:
+        msg = Message(
+            "NoteSaver Pro: Email Verification Code",
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[user.email]
+        )
         msg.body = (
             f"Hello {user.username},\n\n"
             f"Your verification code is: {otp_code}\n\n"
-            "This code will expire in 5 minutes. If you did not request this, please ignore this email.\n\n"
+            "This code expires in 5 minutes. "
+            "If you did not request this, ignore this email.\n\n"
             "Thank you,\nNoteSaver Pro Team"
         )
-        
-        mail.send(msg)
+        thread = threading.Thread(target=_send_mail_async, args=(app._get_current_object(), msg))
+        thread.daemon = True
+        thread.start()
         return True
     except Exception as e:
-        logger.error(f"Error sending verification email to {user.email}: {e}")
-        flash("Error sending verification email. Please try again later.", "danger")
+        logger.error(f"Error queuing verification email to {user.email}: {e}")
         return False
         
 def send_username_reminder_email(user):
-    """Sends the user's username to their registered email address."""
     try:
-        msg = Message("NoteSaver Pro: Your Username Reminder",
-                      sender=app.config['MAIL_DEFAULT_SENDER'],
-                      recipients=[user.email])
-        
+        msg = Message(
+            "NoteSaver Pro: Your Username Reminder",
+            sender=app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[user.email]
+        )
         msg.body = (
-            f"Hello {user.email},\n\n"
-            f"You requested a reminder for your username.\n"
+            f"Hello,\n\n"
             f"Your username is: {user.username}\n\n"
-            "If you did not request this, please secure your account immediately.\n\n"
+            "If you did not request this, secure your account immediately.\n\n"
             "Thank you,\nNoteSaver Pro Team"
         )
-        
-        mail.send(msg)
+        thread = threading.Thread(target=_send_mail_async, args=(app._get_current_object(), msg))
+        thread.daemon = True
+        thread.start()
         return True
     except Exception as e:
-        logger.error(f"Error sending username reminder email to {user.email}: {e}")
+        logger.error(f"Error queuing username reminder to {user.email}: {e}")
         return False
 
 
