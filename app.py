@@ -217,12 +217,11 @@ db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Flask-Session: /tmp use karo — Render pe available hai aur cross-deploy CSRF issue nahi
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = "/tmp/flask_sessions"
+# Session — SQLAlchemy backed (filesystem/tmp use nahi hoga, data persist rahega)
+app.config["SESSION_SQLALCHEMY"] = db
 Session(app)
 
-# Create all database tables on startup (Render pe SQLite ephemeral hai — har deploy pe chahiye)
+# Database tables — PostgreSQL pe create karo
 with app.app_context():
     db.create_all()
     logger.info("Database tables created/verified successfully")
@@ -5610,7 +5609,7 @@ def _send_mail_async(flask_app, msg):
     _dispatch_email(msg)
 
 
-def send_verification_email(user, otp_code):
+`
     """Queue OTP email via SendGrid HTTP API."""
     try:
         msg = Message(
