@@ -1,12 +1,4 @@
-# ============================================================
-#   NoteSaver Pro — app.py   (Upgraded & Hardened v2.0)
-#   Author: NoteSaver Pro Team
-#   All imports deduplicated, security hardened, code cleaned
-# ============================================================
 
-# ──────────────────────────────────────────────────────────
-# 1 ▸ STANDARD LIBRARY
-# ──────────────────────────────────────────────────────────
 import io
 import os
 import re
