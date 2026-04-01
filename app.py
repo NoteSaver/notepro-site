@@ -5609,7 +5609,7 @@ def _send_mail_async(flask_app, msg):
     _dispatch_email(msg)
 
 
-`
+def send_verification_email(user, otp_code):
     """Queue OTP email via SendGrid HTTP API."""
     try:
         msg = Message(
