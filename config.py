@@ -17,6 +17,25 @@ def _require_env(key: str) -> str:
     return val
 
 
+def _get_database_url() -> str:
+    """
+    DATABASE_URL fix karo:
+    - Render PostgreSQL 'postgres://' deta hai
+    - SQLAlchemy ko 'postgresql://' chahiye
+    - Agar kuch nahi mila toh local SQLite use karo
+    """
+    url = os.environ.get('DATABASE_URL', '').strip()
+
+    if not url:
+        return f"sqlite:///{os.path.join(basedir, 'notes.db')}"
+
+    # Render ka URL fix karo
+    if url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+
+    return url
+
+
 class Config:
     # ──────────────────────────────────────────────────────────
     # 🔐 SECRET KEY
@@ -24,10 +43,18 @@ class Config:
     SECRET_KEY = _require_env('SECRET_KEY')
 
     # ──────────────────────────────────────────────────────────
-    # 🗄️  DATABASE
+    # 🗄️  DATABASE — PostgreSQL (Render) ya SQLite (local)
     # ──────────────────────────────────────────────────────────
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/notes.db'
+    SQLALCHEMY_DATABASE_URI = _get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Connection pool — PostgreSQL ke liye zaroori
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,    # Dead connections avoid karo
+        'pool_recycle': 280,      # Render 300s timeout se pehle recycle
+        'pool_size': 5,
+        'max_overflow': 2,
+    }
 
     # ──────────────────────────────────────────────────────────
     # 🛡️  SECURITY
@@ -37,27 +64,13 @@ class Config:
 
     # ──────────────────────────────────────────────────────────
     # 📧  EMAIL  (SendGrid via Flask-Mail)
-    #
-    # SendGrid setup:
-    #   MAIL_SERVER  = smtp.sendgrid.net
-    #   MAIL_PORT    = 587
-    #   MAIL_USE_TLS = True
-    #   MAIL_USERNAME = apikey        ← hamesha 'apikey' hi likhna hai
-    #   MAIL_PASSWORD = SENDGRID_API_KEY  ← Render Environment mein set karo
-    #
-    # Render Dashboard mein 2 variables add karo:
-    #   SENDGRID_API_KEY = SG.xxxxxxxx...
-    #   MAIL_DEFAULT_SENDER = noteprosupport@gmail.com
     # ──────────────────────────────────────────────────────────
-    MAIL_SERVER  = os.environ.get('MAIL_SERVER',  'smtp.sendgrid.net')
-    MAIL_PORT    = int(os.environ.get('MAIL_PORT', 587))
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True').lower()  == 'true'
-    MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'False').lower() == 'true'
-    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', 10))
-
-    # SendGrid ke liye USERNAME hamesha 'apikey' string hoti hai
+    MAIL_SERVER         = os.environ.get('MAIL_SERVER',  'smtp.sendgrid.net')
+    MAIL_PORT           = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS        = os.environ.get('MAIL_USE_TLS',  'True').lower()  == 'true'
+    MAIL_USE_SSL        = os.environ.get('MAIL_USE_SSL',  'False').lower() == 'true'
+    MAIL_TIMEOUT        = int(os.environ.get('MAIL_TIMEOUT', 10))
     MAIL_USERNAME       = 'apikey'
-    # Actual API Key Render ke SENDGRID_API_KEY env variable se aayegi
     MAIL_PASSWORD       = _require_env('SENDGRID_API_KEY')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noteprosupport@gmail.com')
 
@@ -69,3 +82,24 @@ class Config:
         'login', 'register', 'verify_note_password',
         'forgot_password', 'reset_password', 'api_reset_note_password'
     ]
+
+    # ──────────────────────────────────────────────────────────
+    # 📁  FILE UPLOAD
+    # ──────────────────────────────────────────────────────────
+    UPLOAD_FOLDER = os.environ.get(
+        'UPLOAD_FOLDER',
+        os.path.join(basedir, 'static', 'profile_pics')
+    )
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
+
+    # ──────────────────────────────────────────────────────────
+    # 🖥️  SESSION — SQLAlchemy backed
+    # ──────────────────────────────────────────────────────────
+    SESSION_TYPE            = 'sqlalchemy'
+    SESSION_PERMANENT       = False
+    SESSION_USE_SIGNER      = True
+    SESSION_KEY_PREFIX      = 'notesaver:'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE   = os.environ.get('FLASK_ENV') == 'production'
